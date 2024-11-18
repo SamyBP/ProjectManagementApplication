@@ -36,7 +36,7 @@
 * you can create a superuser with:
 
       
-    python manage.py createsuperuser
+      python manage.py createsuperuser
 
 * to start the server run:
 
