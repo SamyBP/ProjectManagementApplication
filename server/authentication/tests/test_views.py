@@ -1,7 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
 from django.urls import reverse
-from .conftests import api_client, user_info
 
 
 @pytest.mark.django_db
