@@ -1,0 +1,60 @@
+name: Check tests pass
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: pg_test
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Setup environment variables
+        run: echo "Setting environment variables"
+        env:
+          DB_NAME: "pg_test"
+          DB_USERNAME: "pg_test"
+          DB_PASSWORD: "test"
+          DB_HOST: "localhost"
+          DB_PORT: "5432"
+          SECRET_KEY: "9313f853ce0b7e6f0e7a77a2fa08889796b92d736ad6d1569089baa1af89b8be"
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Applying migrations
+        working-directory: ./server
+        run: python manage.py migrate
+
+      - name: Test the app
+        working-directory: ./server
+        run: pytest -v
