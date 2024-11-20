@@ -17,8 +17,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: pg_test
-          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_usr
+          POSTGRES_PASSWORD: test_pswd
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -38,12 +39,12 @@ jobs:
       - name: Setup environment variables
         run: echo "Setting environment variables"
         env:
-          DB_NAME: "pg_test"
-          DB_USERNAME: "pg_test"
-          DB_PASSWORD: "test"
-          DB_HOST: "localhost"
-          DB_PORT: "5432"
-          SECRET_KEY: "9313f853ce0b7e6f0e7a77a2fa08889796b92d736ad6d1569089baa1af89b8be"
+          DB_NAME: test_db
+          DB_USERNAME: test_usr
+          DB_PASSWORD: test_pswd
+          DB_HOST: localhost
+          DB_PORT: 5432
+          SECRET_KEY: 9313f853ce0b7e6f0e7a77a2fa08889796b92d736ad6d1569089baa1af89b8be
 
       - name: Install dependencies
         working-directory: ./server
