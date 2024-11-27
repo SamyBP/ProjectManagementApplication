@@ -1,17 +1,9 @@
-import logging
-
-import pytest
-
-from django.urls import reverse
-from rest_framework.test import APIClient
-from django.contrib.auth.models import User
 from dataclasses import dataclass
 
-
-@dataclass
-class TokenResponse:
-    refresh: str
-    access: str
+import pytest
+from django.urls import reverse
+from django.contrib.auth.models import User
+from rest_framework.test import APIClient
 
 
 @dataclass
@@ -20,15 +12,32 @@ class ObtainTokenRequest:
     password: str
 
 
+@dataclass
+class TokenResponse:
+    refresh: str
+    access: str
+
+
 @pytest.fixture
 def api_client() -> APIClient:
     return APIClient()
 
 
 @pytest.fixture
-def token_request() -> ObtainTokenRequest:
-    data = {"username": "test", "password": "testPassword123"}
-    User.objects.create_user(**data)
+def user() -> User:
+    data = {
+        "username": "test",
+        "email": "test@email.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "password": "test"
+    }
+    return User.objects.create_user(**data)
+
+
+@pytest.fixture
+def token_request(user) -> ObtainTokenRequest:
+    data = {"username": user.username, "password": "test"}
     return ObtainTokenRequest(**data)
 
 

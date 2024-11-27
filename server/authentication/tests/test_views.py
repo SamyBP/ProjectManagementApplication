@@ -8,7 +8,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from authentication.tests.conftest import TokenResponse, ObtainTokenRequest
+from conftest import TokenResponse, ObtainTokenRequest
 
 
 @pytest.mark.django_db

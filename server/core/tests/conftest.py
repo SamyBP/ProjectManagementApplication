@@ -13,18 +13,6 @@ class CreateProjectRequest:
 
 
 @pytest.fixture
-def user() -> User:
-    data = {
-        "username": "test",
-        "email": "test@email.com",
-        "first_name": "John",
-        "last_name": "Doe",
-        "password": "test"
-    }
-    return User.objects.create_user(**data)
-
-
-@pytest.fixture
 def project(user: User) -> Project:
     data = {
         "owner": user,
