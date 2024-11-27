@@ -25,6 +25,8 @@ def api_client() -> APIClient:
 
 @pytest.fixture
 def user() -> User:
+    """The user used for testing"""
+
     data = {
         "username": "test",
         "email": "test@email.com",
@@ -37,12 +39,24 @@ def user() -> User:
 
 @pytest.fixture
 def token_request(user) -> ObtainTokenRequest:
+    """Returns a ObtainTokenReqeust object used to create a token for the test user"""
+
     data = {"username": user.username, "password": "test"}
     return ObtainTokenRequest(**data)
 
 
 @pytest.fixture
-def token_response(token_request: ObtainTokenRequest, api_client: APIClient) -> TokenResponse:
+def token(token_request: ObtainTokenRequest, api_client: APIClient) -> TokenResponse:
+    """Returns a TokenResponse object containing an access and refresh token for the test user"""
+
     url = reverse("Obtain access and refresh token")
     response = api_client.post(url, data=token_request.__dict__)
     return TokenResponse(refresh=response.data['refresh'], access=response.data['access'])
+
+
+@pytest.fixture
+def auth_client(api_client: APIClient, token: TokenResponse) -> APIClient:
+    """Returns an APIClient with the Authorization header setup"""
+
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.access}")
+    return api_client
