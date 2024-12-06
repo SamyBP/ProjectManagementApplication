@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
+from constants import Endpoints
+
 
 @dataclass
 class ObtainTokenRequest:
@@ -49,7 +51,7 @@ def token_request(user) -> ObtainTokenRequest:
 def token(token_request: ObtainTokenRequest, api_client: APIClient) -> TokenResponse:
     """Returns a TokenResponse object containing an access and refresh token for the test user"""
 
-    url = reverse("Obtain access and refresh token")
+    url = reverse(Endpoints.TOKEN)
     response = api_client.post(url, data=token_request.__dict__)
     return TokenResponse(refresh=response.data['refresh'], access=response.data['access'])
 

@@ -79,4 +79,3 @@ def test_whenGetProjects_returnsOKResponseIsPaginated(auth_client, user):
     assert "count" in response.data
     assert response.data['count'] == 10
     assert len(response.data['results']) == 5
-
