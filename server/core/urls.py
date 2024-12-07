@@ -9,7 +9,9 @@ urlpatterns = [
         path('', ListCreateUserProjectView.as_view(), name=Endpoints.PROJECT_BASE.value),
         path('<int:pk>/', include([
             path('', RetrieveUpdateDestroyProjectView.as_view(), name=Endpoints.PROJECT_ID.value),
-            path('tasks', ListTasksForProjectView.as_view(), name=Endpoints.TASK_BASE.value)
+            path('tasks/', include([
+                path('', ListTasksForProjectView.as_view(), name=Endpoints.TASK_BASE.value)
+            ]))
         ]))
     ]))
 ]

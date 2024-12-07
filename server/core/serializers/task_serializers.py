@@ -9,3 +9,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
+
+
+class TaskCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = [field.name for field in Task._meta.get_fields() if field.name not in ('project', 'id')]
