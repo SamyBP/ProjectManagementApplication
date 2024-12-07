@@ -1,10 +1,10 @@
+import datetime
+
 import pytest
 from django.urls import reverse
-from django.utils.http import urlencode
 
 from constants import Endpoints
 from core.models import Task, TaskPriority
-import datetime
 
 
 @pytest.mark.django_db
@@ -20,7 +20,7 @@ def test_whenGETTasksUnderAProject_responseIsPaginated(auth_client, user, projec
 
     Task.objects.bulk_create(tasks)
 
-    url = reverse(Endpoints.TASK_BASE, kwargs={'pk': project.id})
+    url = reverse(Endpoints.TASK_BASE, kwargs={'project_id': project.id})
     response = auth_client.get(url)
 
     assert response.status_code == 200

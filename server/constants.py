@@ -8,3 +8,4 @@ class Endpoints(str, Enum):
     PROJECT_BASE = "Create or list projects for user"
     PROJECT_ID = "Retrieve, update, destroy project by id"
     TASK_BASE = "Retrieve all tasks for a specified project"
+    TASK_ID = "Retrieve, update or delete a task by id OWNER"
