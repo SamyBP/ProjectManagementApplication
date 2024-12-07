@@ -8,33 +8,28 @@ from django.db.models.functions import Now
 from core.models import Project
 
 
-class TaskStatus(enum.Enum):
+class BaseChoice(enum.Enum):
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+    @classmethod
+    def values(cls):
+        return [x.value for x in cls]
+
+
+class TaskStatus(BaseChoice):
     ASSIGNED = 'ASSIGNED'
     IN_PROGRESS = 'IN_PROGRESS'
     FINISHED = 'FINISHED'
     CLOSED = 'CLOSED'
 
-    @classmethod
-    def choices(cls):
-        return [(x.value, x.name) for x in cls]
 
-    @classmethod
-    def values(cls):
-        return [x.value for x in cls]
-
-
-class TaskPriority(enum.Enum):
+class TaskPriority(BaseChoice):
     LOW = 'LOW'
     MEDIUM = 'MEDIUM'
     HIGH = 'HIGH'
-
-    @classmethod
-    def choices(cls):
-        return [(x.value, x.name) for x in cls]
-
-    @classmethod
-    def values(cls):
-        return [x.value for x in cls]
 
 
 class Task(models.Model):
@@ -42,7 +37,7 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     title = models.TextField()
     description = models.TextField()
-    status = models.CharField(choices=TaskStatus.choices, default=TaskStatus.ASSIGNED)
+    status = models.CharField(choices=TaskStatus.choices, default=TaskStatus.ASSIGNED.value)
     priority = models.CharField(choices=TaskPriority.choices, blank=False)
     deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -50,15 +45,15 @@ class Task(models.Model):
     class Meta:
         constraints = [
             CheckConstraint(
-                check=Q(status__in=TaskStatus.values()),
+                condition=Q(status__in=TaskStatus.values()),
                 name='task_status_check'
             ),
             CheckConstraint(
-                check=Q(priority__in=TaskPriority.values()),
+                condition=Q(priority__in=TaskPriority.values()),
                 name='task_priority_check'
             ),
             CheckConstraint(
-                check=Q(deadline__gte=Now()),
+                condition=Q(deadline__gte=Now()),
                 name='task_deadline_check'
             )
         ]
