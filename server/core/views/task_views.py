@@ -8,10 +8,7 @@ from core.serializers import TaskDetailSerializer, TaskCreationSerializer
 
 
 class ListTasksForProjectView(ListCreateAPIView):
-    """
-        List all tasks or create a task under a specified project
-        Takes the project id as a url parameter (name is pk)
-    """
+    """ List all tasks or create a task under a specified project """
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsProjectOwner]
@@ -47,5 +44,3 @@ class RetrieveUpdateDestroyTaskView(RetrieveUpdateDestroyAPIView):
         queryset = self.get_queryset()
         task_id = self.kwargs['task_id']
         return queryset.get(pk=task_id)
-
-

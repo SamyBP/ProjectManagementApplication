@@ -24,4 +24,3 @@ def test_whenGETTasksUnderAProject_responseIsPaginated(auth_client, user, projec
     response = auth_client.get(url)
 
     assert response.status_code == 200
-

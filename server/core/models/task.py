@@ -32,10 +32,17 @@ class TaskPriority(BaseChoice):
     HIGH = 'HIGH'
 
 
+task_check_constrains = [
+    (Q(status__in=TaskStatus.values()), 'task_status_check'),
+    (Q(priority__in=TaskPriority.values()), 'task_priority_check'),
+    (Q(deadline__gte=Now()), 'task_deadline_check')
+]
+
+
 class Task(models.Model):
     assignee = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    title = models.TextField()
+    title = models.TextField(unique=True)
     description = models.TextField()
     status = models.CharField(choices=TaskStatus.choices, default=TaskStatus.ASSIGNED.value)
     priority = models.CharField(choices=TaskPriority.choices, blank=False)
@@ -43,17 +50,4 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [
-            CheckConstraint(
-                condition=Q(status__in=TaskStatus.values()),
-                name='task_status_check'
-            ),
-            CheckConstraint(
-                condition=Q(priority__in=TaskPriority.values()),
-                name='task_priority_check'
-            ),
-            CheckConstraint(
-                condition=Q(deadline__gte=Now()),
-                name='task_deadline_check'
-            )
-        ]
+        constraints = [CheckConstraint(condition=x[0], name=x[1]) for x in task_check_constrains]
