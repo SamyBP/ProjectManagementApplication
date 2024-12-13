@@ -1,9 +1,10 @@
+import { JwtDto } from "../models/jwt.dto";
 import { LoginDto } from "../models/login.dto";
 import { Endpoints } from "../utils/endpoints";
 
 export class AuthenticationService {
 
-    async login(loginDto: LoginDto): Promise<any> {
+    async login(loginDto: LoginDto): Promise<JwtDto> {
         const url: string | undefined = Endpoints.LOGIN;
 
         if (url === undefined)
