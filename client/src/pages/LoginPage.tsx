@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Button, Card, Divider, Stack, Typography } from "@mui/material";
+import { Card, Divider, Stack, Typography } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../utils/theme";
 import RoundedTextField from "../components/RoundedTextField";
 import PageContainer from "../components/PageContainer";
 import { LoginDto } from "../models/login.dto";
 import { AuthenticationService } from "../services/authentication.service";
+import GradientButton from "../components/GradientButton";
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -31,20 +32,20 @@ const LoginPage: React.FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <PageContainer>
-                <Card sx={{ padding: 4, width: 400, boxShadow: 3 , height: 'calc(100vh - 300px)'}}>
-                    <Stack spacing={2}>
-                        <Typography variant="h5" align="center" fontWeight="bold">
+                <Card sx={{ padding: 4, width: 400, boxShadow: 3 , height: 'calc(100vh - 350px)'}}>
+                    <Stack spacing={3}>
+                        <Typography variant="h5" align="left" fontWeight="bold">
                             Sign in
                         </Typography>
                         
                         <RoundedTextField value={username} onChange={(e) => setUsername(e.target.value)} label="Username" type="text" fullWidth required />
                         <RoundedTextField  value={password} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" fullWidth required />
 
-                        <Button onClick={onSignIn} variant="contained" fullWidth sx={{ textTransform: 'none' }}>
+                        <GradientButton onClick={onSignIn} variant="contained" fullWidth>
                             Sign in
-                        </Button>
+                        </GradientButton>
 
-                        <div/><div/><div/>
+                        <div/>
 
                         <Typography variant="body2" align="center">
                             Forgot your password?

@@ -14,8 +14,9 @@ const RoundedTextField = styled(TextField)(({ theme }) => ({
     },
     '& .MuiInputBase-input': {
       padding: '8px', 
+      marginBottom: '8px'
     },
-    // Optional: Apply other custom styles like borders or background colors
+
   }));
 
   export default RoundedTextField;

@@ -5,10 +5,7 @@ import { Endpoints } from "../utils/endpoints";
 export class AuthenticationService {
 
     async login(loginDto: LoginDto): Promise<JwtDto> {
-        const url: string | undefined = Endpoints.LOGIN;
-
-        if (url === undefined)
-            throw new Error("The endpoint provided must not be null")
+        const url: string = Endpoints.LOGIN;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -18,6 +15,33 @@ export class AuthenticationService {
 
         if (!response.ok)
             throw new Error(`Error: ${response.statusText}`);
+
+        return await response.json();
+    }
+
+    async isTokenValid(token: string): Promise<boolean> {
+        const url: string = Endpoints.TOKEN_VERIFY;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'token': token})
+        });
+
+        return response.ok;
+    }
+
+    async getNewTokenPair(refreshToken: string): Promise<JwtDto> {
+        const url: string = Endpoints.TOKEN_REFRESH;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'refresh': refreshToken})
+        })
+
+        if (response.status != 201)
+            throw new Error(`Could not obtain a new toke pair ${response.statusText}`)
 
         return await response.json();
     }
