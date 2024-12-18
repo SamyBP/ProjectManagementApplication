@@ -3,8 +3,14 @@ from django.urls import path, include
 from constants import Endpoints
 from core.views import ListCreateUserProjectView, ListTasksForProjectView, RetrieveUpdateDestroyTaskView
 from core.views.project_views import RetrieveUpdateDestroyProjectView
+from core.views.user_views import register_user, get_user_details
 
 urlpatterns = [
+    path('users/', include([
+        path('me/', get_user_details),
+        path('register', register_user)
+    ])),
+
     path('projects/', include([
         path('', ListCreateUserProjectView.as_view(), name=Endpoints.PROJECT_BASE.value),
 
