@@ -5,8 +5,12 @@ import { Card, Stack, Typography } from "@mui/material"
 import RoundedTextField from "../components/RoundedTextField";
 import GradientButton from "../components/GradientButton";
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { RegisterDto } from "../models/register.dto";
+import { AuthenticationService } from "../services/authentication.service";
 
 const SignUpPge: React.FC = () => {
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
@@ -15,6 +19,22 @@ const SignUpPge: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const onSingUp = (event: React.FormEvent) => {
+        event.preventDefault();
+        if (password !== confirmPassword) {
+            console.log("error: passwords do not match");
+        }
+        const dto: RegisterDto = {firstName, lastName, email, username, password}
+        const authenticationService = new AuthenticationService();
+        authenticationService.register(dto)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`${response.statusText}`)
+                    }
+                    navigate('/sign-in');
+                })
+                .catch(error => {
+                    console.log(error)
+                })
 
     }
 
@@ -44,7 +64,8 @@ const SignUpPge: React.FC = () => {
 
 
                         <Typography variant="body2" align="center">
-                            Already have an account?{' '}Sign in
+                            Already have an account?{' '}
+                            <Link to={'/sign-in'}>Sign in</Link>
                         </Typography>
                     </Stack>
                 </Card>

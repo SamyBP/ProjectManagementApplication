@@ -7,6 +7,7 @@ import PageContainer from "../components/PageContainer";
 import { LoginDto } from "../models/login.dto";
 import { AuthenticationService } from "../services/authentication.service";
 import GradientButton from "../components/GradientButton";
+import { Link } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -54,7 +55,8 @@ const LoginPage: React.FC = () => {
                         <Divider>or</Divider>
 
                         <Typography variant="body2" align="center">
-                            Don’t have an account?{' '}Sign up
+                            Don’t have an account?{' '}
+                            <Link to={'/sign-up'}>Sign up</Link>
                         </Typography>
                     </Stack>
                 </Card>

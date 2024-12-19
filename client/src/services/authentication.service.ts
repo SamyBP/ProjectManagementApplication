@@ -1,8 +1,19 @@
 import { JwtDto } from "../models/jwt.dto";
 import { LoginDto } from "../models/login.dto";
+import { RegisterDto } from "../models/register.dto";
 import { Endpoints } from "../utils/endpoints";
 
 export class AuthenticationService {
+
+    register(registerDto: RegisterDto) {
+        const url: string = Endpoints.REGISTER;
+
+        return fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(registerDto)
+        })
+    }
 
     async login(loginDto: LoginDto): Promise<JwtDto> {
         const url: string = Endpoints.LOGIN;
