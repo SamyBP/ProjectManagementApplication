@@ -1,16 +1,15 @@
-from rest_framework import serializers
-
 from core.exceptions import ProjectNameAlreadyExistsException
 from core.models import Project
+from core.serializers.utils import BaseModelSerializer
 
 
-class ProjectDetailsSerializer(serializers.ModelSerializer):
+class ProjectDetailsSerializer(BaseModelSerializer):
     class Meta:
         model = Project
         fields = '__all__'
 
 
-class CreateProjectSerializer(serializers.ModelSerializer):
+class CreateProjectSerializer(BaseModelSerializer):
     class Meta:
         model = Project
         fields = ['name', 'description']

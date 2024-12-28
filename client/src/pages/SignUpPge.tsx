@@ -48,11 +48,13 @@ const SignUpPge: React.FC = () => {
         authenticationService.register(dto)
                 .then(response => {
                     if (!response.ok) {
+                        console.log(response);
                         throw new Error(`${response.statusText}`)
                     }
                     navigate('/sign-in');
                 })
                 .catch(error => {
+                    console.log(error);
                     setErrorMessage(error.message);
                 })
 

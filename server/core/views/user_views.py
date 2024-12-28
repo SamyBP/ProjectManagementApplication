@@ -10,8 +10,9 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from core.decorators import query_params
-from core.models import Task, TaskStatus, TaskPriority
+from core.models import Task, TaskPriority
 from core.serializers import TaskDetailSerializer
+from core.serializers.task_serializers import TaskStatisticsSerializer
 from core.serializers.user_serializers import UserRegisterSerializer, UserSerializer
 
 
@@ -23,6 +24,7 @@ from core.serializers.user_serializers import UserRegisterSerializer, UserSerial
 )
 @api_view(['POST'])
 def register_user(request: Request) -> Response:
+    print(request.data)
     serializer = UserRegisterSerializer(data=request.data)
 
     if not serializer.is_valid():
@@ -49,26 +51,34 @@ def get_user_details(request: Request) -> Response:
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-@query_params('status', 'due_in', 'priority')
-def get_tasks_for_logged_user(request, status: str = None, due_in: str = None, priority: str = None) -> Response:
+@query_params('due_in')
+def get_tasks_for_logged_user(request, due_in: str = None) -> Response:
     tasks = Task.objects.filter(assignee=request.user)
-    if status:
-        if status not in TaskStatus.values():
-            return Response(data={'detail': f'param: status should be one of {TaskStatus.values()}'}, status=400)
-        tasks = tasks.filter(status__iexact=status)
 
     if due_in:
         if int(due_in) < 0:
             return Response(data={'detail': f'param: due_in={due_in} should be a positive integer'}, status=400)
-        interval = datetime.now() + timedelta(days=int(due_in))
-        tasks = tasks.filter(deadline__lte=interval)
-
-    if priority:
-        if priority not in TaskPriority.values():
-            return Response(data={'detail': f'param: priority should be one of {TaskPriority.values()}'}, status=400)
-        tasks = tasks.filter(priority__iexact=priority)
+        start_date = datetime.now()
+        end_date = datetime.now() + timedelta(days=int(due_in))
+        tasks = tasks.filter(deadline__range=(start_date, end_date)).order_by('deadline')
 
     paginator = LimitOffsetPagination()
     paginated_queryset = paginator.paginate_queryset(tasks, request)
     serializer = TaskDetailSerializer(paginated_queryset, many=True)
     return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_statistics_for_user(request: Request) -> Response:
+    tasks = Task.objects.filter(assignee=request.user)
+
+    stats = {
+        'low': tasks.filter(priority=TaskPriority.LOW.value).count(),
+        'medium': tasks.filter(priority=TaskPriority.MEDIUM.value).count(),
+        'high': tasks.filter(priority=TaskPriority.HIGH.value).count()
+    }
+
+    serializer = TaskStatisticsSerializer(stats)
+    return Response(serializer.data)

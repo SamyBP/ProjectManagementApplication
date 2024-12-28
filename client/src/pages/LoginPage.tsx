@@ -24,6 +24,7 @@ const LoginPage: React.FC = () => {
                 localStorage.clear();
                 localStorage.setItem('access', response.access);
                 localStorage.setItem('refresh', response.refresh);
+                window.location.href = '/dashboard';
             })
             .catch((error) => {
                 setErrorMessage(error.message);

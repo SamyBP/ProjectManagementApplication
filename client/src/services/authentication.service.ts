@@ -15,6 +15,10 @@ export class AuthenticationService {
         })
     }
 
+    logout() {
+        localStorage.clear();
+    }
+
     async login(loginDto: LoginDto): Promise<JwtDto> {
         const url: string = Endpoints.LOGIN;
 
@@ -30,7 +34,35 @@ export class AuthenticationService {
         return await response.json();
     }
 
-    async isTokenValid(token: string): Promise<boolean> {
+    getAccessTokenOrSignOut(): Promise<string> {
+        const accessToken = localStorage.getItem('access');
+        const refreshToken = localStorage.getItem('refresh');
+
+        if (!accessToken || !refreshToken) {
+            throw new Error('Missing tokens');
+        }
+
+        return this.isTokenValid(accessToken)
+            .then(isAccessTokenValid => {
+                if (isAccessTokenValid) {
+                    return accessToken;
+                }
+
+                return this.isTokenValid(refreshToken)
+                    .then(async (isRefreshTokenValid) => {
+                        if (isRefreshTokenValid) {
+                            const newTokenPair = await this.getNewTokenPair(refreshToken);
+                            localStorage.setItem('accessToken', newTokenPair.access); 
+                            localStorage.setItem('refreshToken', newTokenPair.refresh); 
+                            return newTokenPair.access; 
+                        }
+        
+                        throw new Error('Invalid tokens. Please sign in again.');
+                    });
+            }) 
+    }
+
+    private async isTokenValid(token: string): Promise<boolean> {
         const url: string = Endpoints.TOKEN_VERIFY;
 
         const response = await fetch(url, {
@@ -42,7 +74,7 @@ export class AuthenticationService {
         return response.ok;
     }
 
-    async getNewTokenPair(refreshToken: string): Promise<JwtDto> {
+    private async getNewTokenPair(refreshToken: string): Promise<JwtDto> {
         const url: string = Endpoints.TOKEN_REFRESH;
 
         const response = await fetch(url, {
@@ -51,7 +83,7 @@ export class AuthenticationService {
             body: JSON.stringify({'refresh': refreshToken})
         })
 
-        if (response.status != 201)
+        if (response.status !== 201)
             throw new Error(`Could not obtain a new toke pair ${response.statusText}`)
 
         return await response.json();
