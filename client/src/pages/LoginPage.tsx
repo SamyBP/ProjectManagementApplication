@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const onSignIn = (event: React.FormEvent) => {
         event.preventDefault();
@@ -25,6 +26,7 @@ const LoginPage: React.FC = () => {
                 localStorage.setItem('refresh', response.refresh);
             })
             .catch((error) => {
+                setErrorMessage(error.message);
                 console.log(error);
             })
     }
@@ -45,6 +47,10 @@ const LoginPage: React.FC = () => {
                         <GradientButton onClick={onSignIn} variant="contained" fullWidth>
                             Sign in
                         </GradientButton>
+
+                        <Typography variant="body2" align="center" color="error">
+                            {errorMessage}
+                        </Typography>
 
                         <div/>
 

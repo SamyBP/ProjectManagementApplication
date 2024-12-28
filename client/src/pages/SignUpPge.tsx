@@ -4,7 +4,7 @@ import PageContainer from "../components/PageContainer"
 import { Card, Stack, Typography } from "@mui/material"
 import RoundedTextField from "../components/RoundedTextField";
 import GradientButton from "../components/GradientButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { RegisterDto } from "../models/register.dto";
 import { AuthenticationService } from "../services/authentication.service";
@@ -17,12 +17,32 @@ const SignUpPge: React.FC = () => {
     const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const validatePassword = (password: string, confirmedPassword: string) => {
+        if (password !== confirmedPassword) {
+            throw new Error("Passwords do not match, please try again!");
+        }
+    }
+
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            throw new Error("Email must be a valid email address!");
+        }
+    }
 
     const onSingUp = (event: React.FormEvent) => {
         event.preventDefault();
-        if (password !== confirmPassword) {
-            console.log("error: passwords do not match");
+        
+        try {
+            validatePassword(password, confirmPassword);
+            validateEmail(email);
+        } catch (error: any) {
+            setErrorMessage(error.message);
+            return;
         }
+
         const dto: RegisterDto = {firstName, lastName, email, username, password}
         const authenticationService = new AuthenticationService();
         authenticationService.register(dto)
@@ -33,7 +53,7 @@ const SignUpPge: React.FC = () => {
                     navigate('/sign-in');
                 })
                 .catch(error => {
-                    console.log(error)
+                    setErrorMessage(error.message);
                 })
 
     }
@@ -62,11 +82,15 @@ const SignUpPge: React.FC = () => {
                             Sign up
                         </GradientButton>
 
+                        <Typography variant="body2" align="center" color="error">
+                            {errorMessage}
+                        </Typography>
 
                         <Typography variant="body2" align="center">
                             Already have an account?{' '}
                             <Link to={'/sign-in'}>Sign in</Link>
                         </Typography>
+
                     </Stack>
                 </Card>
             </PageContainer>

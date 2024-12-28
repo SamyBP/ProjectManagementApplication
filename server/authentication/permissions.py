@@ -6,3 +6,10 @@ class IsProjectOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
+
+
+class HasTaskAssigned(BasePermission):
+    """Permission class used to restrict update to a task item"""
+
+    def has_object_permission(self, request, view, obj):
+        return obj.assignee == request.user
