@@ -1,9 +1,9 @@
 from django.urls import path, include
 
 from constants import Endpoints
-from core.views.project_views import project_handler, project_detail_handler
-from core.views.task_views import task_handler, task_detail_handler
-from core.views.user_views import register_user, get_user_details, get_tasks_for_logged_user, get_statistics_for_user
+from core.routes.project_routes import project_handler, project_detail_handler
+from core.routes.task_routes import task_handler, task_detail_handler
+from core.routes.user_routes import register_user, get_user_details, get_tasks_for_logged_user, get_statistics_for_user
 
 urlpatterns = [
     path('users/', include([
