@@ -4,12 +4,13 @@ import { TaskModel } from "../models/task.model";
 
 
 interface PaginatedTaskCardProps {
-  title: string;
+  title?: string;
   tasks: TaskModel[];
   tasksPerPage?: number;
+  padding?: number | string;
 }
 
-const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title, tasks, tasksPerPage = 5 }) => {
+const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title = '', tasks, tasksPerPage = 5, padding = 4 }) => {
   const [page, setPage] = useState<number>(1);
 
   const indexOfLastTask = page * tasksPerPage;
@@ -21,7 +22,7 @@ const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title, tasks, tas
   };
 
   return (
-    <Card sx={{ padding: 4, width: 1/1, boxShadow: 1 }}>
+    <Card sx={{ padding: padding, width: 1/1, boxShadow: 1 }}>
       <Typography variant="body2" sx={{ fontWeight: 550, lineHeight: '24px', marginBottom: 2 }}>
         {title}
       </Typography>

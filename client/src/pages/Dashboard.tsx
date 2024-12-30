@@ -15,16 +15,6 @@ import { UserService } from "../services/user.service";
 import { TaskService } from "../services/task.service";
 import { AuthenticationService } from "../services/authentication.service";
 
-const mockProjects = [
-    {id: 1, name: "benipintea/task-manager-api"},
-    {id: 2, name: "benipintea/chat-app-ui"},
-    {id: 3, name: "benipintea/project-dashboard"},
-    {id: 4, name: "benipintea/real-time-analytics"},
-    {id: 5, name: "johnsmith/ecommerce-platform"},
-    {id: 6, name: "benipintea/multi-tenant-crm"},
-    {id: 7, name: "janedoe/portfolio-website"},
-];
-
 
 export default function Dashboard() {
     const [taskStats, setTaskStats] = useState<TaskStatsDto[]>([]);
@@ -85,7 +75,7 @@ export default function Dashboard() {
         const loadData = async () => {
             try {
                 const accessToken =  await authService.getAccessTokenOrSignOut();
-                setProjects(mockProjects);
+                loadUserProjects(accessToken, projectService);
                 loadLoggedUser(accessToken, userService);
                 loadTaskStatistics(accessToken, taskService);
                 loadUpcomingTasks(accessToken, taskService);
