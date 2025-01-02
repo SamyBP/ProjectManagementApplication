@@ -39,7 +39,7 @@ export default function SideMenu({projects, user}: SideMenuProps) {
                                 <Link 
                                     to={`/projects/${project.id}`}
                                     style={{ textDecoration: "none", color: "black" }}
-                                    state={{ project }}
+                                    state={{ project, user }}
                                 >
                                     <ListItemText primary={project.name} /> 
                                 </Link> 

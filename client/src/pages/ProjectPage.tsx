@@ -10,6 +10,8 @@ import theme from "../utils/theme";
 import { TaskModel } from "../models/task.model";
 import PaginatedTaskCard from "../components/PaginatedTaskCard";
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { AuthenticationService } from "../services/authentication.service";
+import { error } from "console";
 
 const archives = [
     { id: 1,  name: 'Project_SNAPSHOT_01' },
@@ -26,23 +28,32 @@ export default function ProjectPage() {
     const location = useLocation();
     
     useEffect(() => {
+        const authService = new AuthenticationService();
         const projectService = new ProjectService();
-        if (location.state?.project) {
-            setProject(location.state.project);
-        } else {
-            projectService.getProjectById("", Number(projectId))
-                .then(response => {
-                    setProject(response);
-                })
-                .catch(error => {
-                    console.log(error);
-                })
+
+        const fetchProjectData = async () => {
+            try {
+                const accessToken = await authService.getAccessTokenOrSignOut()
+
+                if (location.state?.project) {
+                    setProject(location.state.project);
+                } else {
+                    const projectData = await projectService.getProjectById(accessToken, Number(projectId));
+                    setProject(projectData); 
+                }
+
+                const taskData = await projectService.getAllTasksUnderProject(accessToken, Number(projectId));
+                setTasksUnderProejct(taskData);
+            } catch(error) {
+                console.log(error);
+                authService.logout();
+                window.location.href = '/sign-in';
+            }
         }
-        projectService.getAllTasksUnderProject("", Number(projectId))
-            .then(response => {
-                setTasksUnderProejct(response);
-            })
-    }, [projectId])
+
+        fetchProjectData();
+
+    }, [projectId, location])
 
 
     return (
@@ -62,9 +73,12 @@ export default function ProjectPage() {
                         <Stack sx={{ margin: 1 }} spacing={1.5}>
                             <Stack direction={"row"} justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
                                 <h3>{project.name}</h3>
-                                <IconButton aria-label="settings">
-                                <SettingsIcon sx={{ color: theme.palette.primary.main }} />
-                                </IconButton> 
+                                {location.state.user.id == project.owner && (
+                                    <IconButton aria-label="settings">
+                                        <SettingsIcon sx={{ color: theme.palette.primary.main }} />
+                                    </IconButton> 
+                                )}
+                                
                             </Stack>
                         </Stack> 
                         <Divider />
@@ -96,7 +110,7 @@ export default function ProjectPage() {
                             </Typography>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                {project.constributors.map((contributor) => (
+                                {project.contributors.map((contributor) => (
                                     <div key={contributor.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
 
                                     <Avatar sx={{ bgcolor: '#363333', width: 30, height: 30 }}>
@@ -127,7 +141,7 @@ export default function ProjectPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {archives.map((archive) => (
                                 <div key={archive.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <PictureAsPdfIcon sx={{ color: 'red', width: 24, height: 24 }} />
+                                    <PictureAsPdfIcon sx={{ color: '#D22B2B', width: 24, height: 24 }} />
 
                                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                         {archive.name}

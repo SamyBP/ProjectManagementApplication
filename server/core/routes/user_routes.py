@@ -1,84 +1,50 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.viewsets import ViewSet
 
-from core.decorators import query_params
+from core.exceptions import BaseHttpException
 from core.models import Task, TaskPriority
+from core.routes.utils import BaseController
 from core.serializers import TaskDetailSerializer
 from core.serializers.task_serializers import TaskStatisticsSerializer
 from core.serializers.user_serializers import UserRegisterSerializer, UserSerializer
+from decorators import response, paginated, query_params
 
 
-@swagger_auto_schema(
-    method='post',
-    operation_description="Register a new user",
-    request_body=UserRegisterSerializer,
-    responses={HTTP_200_OK: 'Successfully registered', HTTP_400_BAD_REQUEST: 'Invalid payload'}
-)
-@api_view(['POST'])
-def register_user(request: Request) -> Response:
-    print(request.data)
-    serializer = UserRegisterSerializer(data=request.data)
+class UserController(ViewSet, BaseController):
 
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    @action(detail=False, methods=['post'], permission_classes=[])
+    @response(status_code=201)
+    def register(self, request: Request):
+        serializer = UserRegisterSerializer(data=request.data)
+        self.save(serializer)
 
-    serializer.save()
-    return Response(status=HTTP_200_OK)
+    @action(detail=False, methods=['get'])
+    @response(serializer_class=UserSerializer)
+    def me(self, request: Request):
+        return request.user
 
+    @action(detail=False, methods=['get'])
+    @paginated(serializer_class=TaskDetailSerializer)
+    @query_params('due_in')
+    def tasks(self, request: Request, due_in: str = None):
+        print(request.user)
+        queryset = Task.objects.filter(assignee=request.user)
 
-@swagger_auto_schema(
-    method='get',
-    operation_description='Retrieve the details of the user making the request',
-    responses={HTTP_200_OK: UserSerializer, 401: 'Authentication credentials were not provided.'}
-)
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def get_user_details(request: Request) -> Response:
-    user = request.user
-    serializer = UserSerializer(user)
-    return Response(serializer.data, status=HTTP_200_OK)
+        if due_in:
+            if int(due_in) < 0:
+                raise BaseHttpException(status_code=400, details=f'param: due_in={due_in} should be a positive integer')
+            start_date = datetime.now()
+            end_date = start_date + timedelta(days=int(due_in))
+            queryset = queryset.filter(deadline__range=(start_date, end_date)).order_by('deadline')
 
+        return queryset
 
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-@query_params('due_in')
-def get_tasks_for_logged_user(request, due_in: str = None) -> Response:
-    tasks = Task.objects.filter(assignee=request.user)
-
-    if due_in:
-        if int(due_in) < 0:
-            return Response(data={'detail': f'param: due_in={due_in} should be a positive integer'}, status=400)
-        start_date = datetime.now()
-        end_date = datetime.now() + timedelta(days=int(due_in))
-        tasks = tasks.filter(deadline__range=(start_date, end_date)).order_by('deadline')
-
-    paginator = LimitOffsetPagination()
-    paginated_queryset = paginator.paginate_queryset(tasks, request)
-    serializer = TaskDetailSerializer(paginated_queryset, many=True)
-    return paginator.get_paginated_response(serializer.data)
-
-
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def get_statistics_for_user(request: Request) -> Response:
-    tasks = Task.objects.filter(assignee=request.user)
-
-    stats = {
-        'low': tasks.filter(priority=TaskPriority.LOW.value).count(),
-        'medium': tasks.filter(priority=TaskPriority.MEDIUM.value).count(),
-        'high': tasks.filter(priority=TaskPriority.HIGH.value).count()
-    }
-
-    serializer = TaskStatisticsSerializer(stats)
-    return Response(serializer.data)
+    @action(detail=False, methods=['get'])
+    @response(serializer_class=TaskStatisticsSerializer)
+    def stats(self, request: Request):
+        tasks = Task.objects.filter(assignee=request.user)
+        priorities = [(p.lower(), p) for p in TaskPriority.values()]
+        return {p_low: tasks.filter(priority=p_upper).count() for p_low, p_upper in priorities}
