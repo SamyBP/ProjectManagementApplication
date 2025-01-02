@@ -7,6 +7,17 @@ from core.exceptions import BaseHttpException
 
 
 def paginated(serializer_class):
+    """
+    A decorator to paginate a returned queryset. The method decorated must return a queryset or raise a
+    BaseHttpException. The first argument of the decorated method must be a Request object
+
+    Params:
+        serializer_class: The serializer class used to serializer the response
+    Returns:
+         Response: A rest_framework.response.Response containing the serialized paginated data or a detailed
+                error message if a BaseHttpException was raised during the execution of the decorated method
+
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):

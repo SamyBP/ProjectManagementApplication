@@ -30,7 +30,6 @@ class UserController(ViewSet, BaseController):
     @paginated(serializer_class=TaskDetailSerializer)
     @query_params('due_in')
     def tasks(self, request: Request, due_in: str = None):
-        print(request.user)
         queryset = Task.objects.filter(assignee=request.user)
 
         if due_in:
