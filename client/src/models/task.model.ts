@@ -1,5 +1,11 @@
+import { UserModel } from "./user.model"
+
 export interface TaskModel {
     id: number,
-    title: string, 
+    assignee: UserModel
+    title: string,
+    description: string,
+    status: string,
+    priority: string,
     dueIn: number
 }

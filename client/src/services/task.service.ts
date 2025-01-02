@@ -44,7 +44,15 @@ export class TaskService {
         return data.results.map((task: any) => {
             const deadline = new Date(task.deadline)
             const dueIn = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-            return {id: task.id, title: task.title, dueIn: dueIn}
+            return {
+                id: task.id,
+                assignee: task.assignee,
+                title: task.title,
+                description: task.description,
+                status: task.status,
+                priority: task.priority,
+                dueIn: dueIn
+            }
         })
     }
 }

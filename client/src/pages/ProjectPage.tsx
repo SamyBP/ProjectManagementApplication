@@ -84,7 +84,7 @@ export default function ProjectPage() {
                         <Divider />
                         <Stack direction={"row"} spacing={2} alignItems={"stretch"} alignContent={"center"}>
                             {tasksUnderProject.length !== 0 && (
-                                <PaginatedTaskCard tasks={tasksUnderProject} tasksPerPage={5} padding={0} />
+                                <PaginatedTaskCard tasks={tasksUnderProject} tasksPerPage={5} padding={0} detailed={true}/>
                             )}
                         </Stack>
                     </Card>
