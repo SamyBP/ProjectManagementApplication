@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import SignUpPge from './pages/SignUpPge';
 import Dashboard from './pages/Dashboard';
 import ProjectPage from './pages/ProjectPage';
+import ProjectSettingsPage from './pages/ProjectSettingsPage';
 
 
 const App: React.FC = () => (
@@ -15,6 +16,7 @@ const App: React.FC = () => (
         <Route path='/sign-up' element = { <SignUpPge/>} />
         <Route path='dashboard' element = { <Dashboard /> } />
         <Route path="/projects/:projectId" element = { <ProjectPage /> } />
+        <Route path="//projects/:projectId/settings" element = { <ProjectSettingsPage /> } />
       </Routes>
     </BrowserRouter>
 

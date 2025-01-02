@@ -13,6 +13,7 @@ const GradientButton = styled(Button, {
     background: `linear-gradient(${selectedColor.light} 10%, ${selectedColor.main} 50%)`,
     color: selectedColor.contrastText,
     border: 0,
+    borderColor: `${selectedColor.main}`,
     borderRadius: theme.shape.borderRadius,
     padding: "8px 16px",
     boxShadow: `0 3px 5px 2px ${selectedColor.light}33`, 

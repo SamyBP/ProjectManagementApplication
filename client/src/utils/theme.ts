@@ -11,8 +11,8 @@ const theme = createTheme({
         light: "#D3D3D3" 
       },
       error: {
-        main: "#d32f2f",
-        light: "#ef5350" 
+        main: "#d1242f",
+        light: "#d1242f" 
       },
       warning: {
         main: "#e65100",
