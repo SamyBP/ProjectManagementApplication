@@ -1,9 +1,12 @@
 from core.exceptions import ProjectNameAlreadyExistsException
 from core.models import Project
+from core.serializers.user_serializers import UserSerializer
 from core.serializers.utils import BaseModelSerializer
 
 
 class ProjectDetailsSerializer(BaseModelSerializer):
+    contributors = UserSerializer(many=True, read_only=True)
+
     class Meta:
         model = Project
         fields = '__all__'
@@ -31,4 +34,8 @@ class CreateProjectSerializer(BaseModelSerializer):
 
         user = self.context['request'].user
         validated_data['owner'] = user
-        return Project.objects.create(**validated_data)
+
+        created_project = Project.objects.create(**validated_data)
+        created_project.contributors.add(user)
+
+        return created_project

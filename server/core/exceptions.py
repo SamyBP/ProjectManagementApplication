@@ -8,5 +8,7 @@ class ProjectNameAlreadyExistsException(serializers.ValidationError):
         super().__init__({'description': message})
 
 
-class InvalidPayloadException(Exception):
-    pass
+class BaseHttpException(Exception):
+    def __init__(self, status_code: int, details: str):
+        self.status_code = status_code
+        self.details = details

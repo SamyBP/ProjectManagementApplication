@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from config.settings import PAGINATION_PAGE_SIZE
 from constants import Endpoints
 from .conftest import CreateProjectRequest
 from ..models import Project
@@ -69,7 +70,8 @@ def test_whenGetProjects_noToken_returnsUnauthorized(api_client):
 
 @pytest.mark.django_db
 def test_whenGetProjects_returnsOKResponseIsPaginated(auth_client, user):
-    projects = [Project(owner=user, name=f'{user.username}/{i}', description=str(i)) for i in range(10)]
+    number_of_projects = 25
+    projects = [Project(owner=user, name=f'{user.username}/{i}', description=str(i)) for i in range(number_of_projects)]
     Project.objects.bulk_create(projects)
     url = reverse(Endpoints.PROJECT_BASE)
 
@@ -77,5 +79,5 @@ def test_whenGetProjects_returnsOKResponseIsPaginated(auth_client, user):
 
     assert response.status_code == 200
     assert "count" in response.data
-    assert response.data['count'] == 10
-    assert len(response.data['results']) == 5
+    assert response.data['count'] == number_of_projects
+    assert len(response.data['results']) == PAGINATION_PAGE_SIZE

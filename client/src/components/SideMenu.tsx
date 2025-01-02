@@ -37,9 +37,9 @@ export default function SideMenu({projects, user}: SideMenuProps) {
                         <ListItem key={index} disablePadding sx={{ display: 'block' }}>
                             <ListItemButton>
                                 <Link 
-                                    to='/' 
+                                    to={`/projects/${project.id}`}
                                     style={{ textDecoration: "none", color: "black" }}
-                                    state={{ project }}
+                                    state={{ project, user }}
                                 >
                                     <ListItemText primary={project.name} /> 
                                 </Link> 

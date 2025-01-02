@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SideMenu from "../components/SideMenu";
 import { ProjectModel } from "../models/project.model";
 import { UserModel } from "../models/user.model";
@@ -14,19 +14,12 @@ import { ProjectService } from "../services/project.service";
 import { UserService } from "../services/user.service";
 import { TaskService } from "../services/task.service";
 import { AuthenticationService } from "../services/authentication.service";
-
-const mockProjects = [
-    {id: 1, name: "benipintea/task-manager-api"},
-    {id: 2, name: "benipintea/chat-app-ui"},
-    {id: 3, name: "benipintea/project-dashboard"},
-    {id: 4, name: "benipintea/real-time-analytics"},
-    {id: 5, name: "johnsmith/ecommerce-platform"},
-    {id: 6, name: "benipintea/multi-tenant-crm"},
-    {id: 7, name: "janedoe/portfolio-website"},
-];
+import { CreateProjectDto } from "../models/create.project.dto";
 
 
 export default function Dashboard() {
+    const [newProjectName, setNewProjectName] = useState<string>('');
+    const [newProjectDescription, setNewProjectDescription] = useState<string>('');
     const [taskStats, setTaskStats] = useState<TaskStatsDto[]>([]);
     const [projects, setProjects] = useState<ProjectModel[]>([]);
     const [user, setUser] = useState<UserModel | null>(null);
@@ -76,6 +69,21 @@ export default function Dashboard() {
             })
     }
 
+    const onCreateProjectButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const projectService = new ProjectService();
+        const authService = new AuthenticationService();
+
+        try {
+            const accessToken = await authService.getAccessTokenOrSignOut();
+            const dto: CreateProjectDto = { name: newProjectName, description: newProjectDescription }
+            const createdProject = await projectService.createNewProject(accessToken, dto);
+            console.log(createdProject);
+        } catch(error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         const authService: AuthenticationService = new AuthenticationService();
         const taskService: TaskService = new TaskService();
@@ -85,7 +93,7 @@ export default function Dashboard() {
         const loadData = async () => {
             try {
                 const accessToken =  await authService.getAccessTokenOrSignOut();
-                setProjects(mockProjects);
+                loadUserProjects(accessToken, projectService);
                 loadLoggedUser(accessToken, userService);
                 loadTaskStatistics(accessToken, taskService);
                 loadUpcomingTasks(accessToken, taskService);
@@ -129,18 +137,22 @@ export default function Dashboard() {
 
                             <Stack spacing={2} marginTop={3}>
                                 <RoundedTextField 
+                                    value={newProjectName}
+                                    onChange={(e) => setNewProjectName(e.target.value)}
                                     label="Project name" 
                                     placeholder="name your new project..." 
                                     fullWidth 
                                     required
                                 />
-                                <RoundedTextField 
+                                <RoundedTextField
+                                    value={newProjectDescription}
+                                    onChange={(e) => setNewProjectDescription(e.target.value)} 
                                     label="Project description"
                                     placeholder="add a description to your project..."
                                     fullWidth 
                                     required
                                 />
-                                <GradientButton variant="contained" sx={{width: 1/3}} color="success">
+                                <GradientButton variant="contained" sx={{width: 1/3}} color="success" onClick={onCreateProjectButtonClick}>
                                     <Typography variant="caption">
                                     Create a new project
                                     </Typography>

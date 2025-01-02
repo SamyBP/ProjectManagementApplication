@@ -1,28 +1,29 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from constants import Endpoints
-from core.views.project_views import project_handler, project_detail_handler
-from core.views.task_views import task_handler, task_detail_handler
-from core.views.user_views import register_user, get_user_details, get_tasks_for_logged_user, get_statistics_for_user
+from core.routes.task_routes import BaseTaskController, DetailedTaskController
+from core.routes.project_routes import BaseProjectController, DetailedProjectController
+from core.routes.user_routes import UserController
+
+user_router = DefaultRouter()
+user_router.register(r'', UserController, basename='')
 
 urlpatterns = [
-    path('users/', include([
-        path('me', get_user_details),
-        path('register', register_user),
-        path('tasks', get_tasks_for_logged_user),
-        path('stats', get_statistics_for_user)
-    ])),
+
+
+    path('users/', include(user_router.urls)),
 
     path('projects/', include([
-        path('', project_handler, name=Endpoints.PROJECT_BASE.value),
+        path('', BaseProjectController.as_view(), name=Endpoints.PROJECT_BASE.value),
 
         path('<int:project_id>/', include([
-            path('', project_detail_handler, name=Endpoints.PROJECT_ID.value),
+            path('', DetailedProjectController.as_view(), name=Endpoints.PROJECT_ID.value),
 
             path('tasks/', include([
-                path('', task_handler, name=Endpoints.TASK_BASE.value),
+                path('', BaseTaskController.as_view(), name=Endpoints.TASK_BASE.value),
 
-                path('<int:task_id>/', task_detail_handler, name=Endpoints.TASK_ID.value)
+                path('<int:task_id>/', DetailedTaskController.as_view(), name=Endpoints.TASK_ID.value)
             ]))
         ]))
     ]))

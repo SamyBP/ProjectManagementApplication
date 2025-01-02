@@ -110,9 +110,11 @@ DATABASES = {
     }
 }
 
+PAGINATION_PAGE_SIZE = 20
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 5,
+    'PAGE_SIZE': PAGINATION_PAGE_SIZE,
 }
 
 SIMPLE_JWT = {
