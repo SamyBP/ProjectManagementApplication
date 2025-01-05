@@ -1,4 +1,6 @@
+import { CreateTaskDto } from "../models/create.task.dto";
 import { TaskStatsDto } from "../models/task-stats.dto";
+import { TaskModel } from "../models/task.model";
 import { Endpoints } from "../utils/endpoints";
 
 export class TaskService {
@@ -54,5 +56,36 @@ export class TaskService {
                 dueIn: dueIn
             }
         })
+    }
+
+    async createNewTask(acccessToken: string, projectId: Number, dto: CreateTaskDto): Promise<TaskModel> {
+        const url = Endpoints.PROJECTS_API.concat(`/${projectId}/tasks/`);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${acccessToken}`
+            },
+            body: JSON.stringify(dto)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`)
+        }
+
+        const data = await response.json();
+        const now = new Date(); 
+        const dueIn = Math.ceil(( new Date(data.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+        return {
+            id: data.id,
+            assignee: data.assignee,
+            title: data.title,
+            description: data.description,
+            status: data.status,
+            priority: data.priority,
+            dueIn: dueIn
+        }
     }
 }

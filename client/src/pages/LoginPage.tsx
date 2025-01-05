@@ -14,22 +14,20 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const onSignIn = (event: React.FormEvent) => {
+    const onSignIn = async (event: React.FormEvent) => {
         event.preventDefault();
         const dto: LoginDto = {username, password};
         const authenticationService = new AuthenticationService();
-        authenticationService.login(dto)
-            .then((response) => {
-                console.log("success");
-                localStorage.clear();
-                localStorage.setItem('access', response.access);
-                localStorage.setItem('refresh', response.refresh);
-                window.location.href = '/dashboard';
-            })
-            .catch((error) => {
-                setErrorMessage(error.message);
-                console.log(error);
-            })
+        try {
+            const jwt = await authenticationService.login(dto);
+            localStorage.clear();
+            localStorage.setItem('access', jwt.access);
+            localStorage.setItem('refresh', jwt.refresh);
+            window.location.href = '/dashboard'
+        } catch (error: any) {
+            setErrorMessage(error.message);
+            console.log(error);
+        }
     }
 
 

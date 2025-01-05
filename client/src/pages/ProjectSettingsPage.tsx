@@ -1,19 +1,94 @@
 import { useLocation, useParams } from "react-router-dom";
 import { ProjectModel } from "../models/project.model";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Divider, FormControl, InputLabel, NativeSelect, Stack, TextField, ThemeProvider, Typography } from "@mui/material";
 import GradientButton from "../components/GradientButton";
-import RoundedTextField from "../components/RoundedTextField";
 import theme from "../utils/theme";
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-
-
+import { CreateTaskDto } from "../models/create.task.dto";
+import { CreateProjectDto } from "../models/create.project.dto";
+import { ProjectService } from "../services/project.service";
+import { AuthenticationService } from "../services/authentication.service";
+import { TaskService } from "../services/task.service";
 
 export default function ProjectSettingsPage() {
     const location = useLocation();
     const {projectId} = useParams();
     const [project, setProject] = useState<ProjectModel| null>(null);
+
+    // CreateTaskForm
+    const [taskTitle, setTaskTitile] = useState('');
+    const [taskDescription, setTaskDescription] = useState('');
+    const [taskPriority, setTaskPriority] = useState('');
+    const [assigneeId, setAssigneeId] = useState<any>(null);
+    const [taskDeadline, setTaskDeadline] = useState<any>(null);
+
+    // Edit Project Form
+
+    const [newProjectName, setNewProjectName] = useState('');
+    const [newProjectDescription, setNewProjectDescription] = useState('');
+
+
+    const onCreateTaskButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        if (!assigneeId) {
+            console.log("assignee is null");
+            return
+        }
+
+        const dto: CreateTaskDto = {
+            title: taskTitle,
+            description: taskDescription,
+            priority: taskPriority,
+            status: "ASSIGNED",
+            assignee: assigneeId,
+            deadline: taskDeadline ? taskDeadline.format("YYYY-MM-DD") : ""
+        }
+
+        const taskService: TaskService = new TaskService();
+        const authService: AuthenticationService = new AuthenticationService();
+        try {
+            const accessToken = await authService.getAccessTokenOrSignOut();
+            const createdTask = await taskService.createNewTask(accessToken, Number(projectId), dto);
+            console.log(`Created task: ${createdTask}`);
+        } catch (error: any)  {
+            console.log(error.message);
+        }
+
+    }
+
+    const onEditProjectButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const dto: CreateProjectDto =  {name: newProjectName, description: newProjectDescription}
+        const projectService: ProjectService = new ProjectService();
+        const authService: AuthenticationService = new AuthenticationService();
+        try {
+            const accessToken = await authService.getAccessTokenOrSignOut();
+            const updatedProject = await projectService.updateProject(accessToken, Number(projectId), dto);
+    
+            console.log(`Updated project ${updatedProject}`);
+        } catch (error: any) {
+            console.log(error.message);
+        }
+
+    }
+
+    const onDeleteProjectButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const projectService: ProjectService = new ProjectService();
+        const authService: AuthenticationService = new AuthenticationService();
+        try {
+            const accessToken = await authService.getAccessTokenOrSignOut();
+            const isDeleted = await projectService.deleteProject(accessToken, Number(projectId));
+    
+            console.log(`Deleted project: ${isDeleted}`);
+        } catch(error: any) {
+            console.log(error.message)
+        }
+    }
 
     useEffect(() => {
         if (location.state.project.owner !== location.state.user.id) {
@@ -61,6 +136,7 @@ export default function ProjectSettingsPage() {
                             variant='contained'
                             color="success"
                             sx={{margin: 1, height: 30}}
+                            onClick={onCreateTaskButtonClick}
                         >
                             Create task
                         </GradientButton>
@@ -71,38 +147,57 @@ export default function ProjectSettingsPage() {
                             size="small" 
                             label='Task title'
                             placeholder="enter the task's title"
+                            value={taskTitle}
+                            onChange={(e) => setTaskTitile(e.target.value)}
                         />
 
                         <TextField
                             size="small"
                             label='Task description'
                             placeholder="enter the task's description"
+                            value={taskDescription}
+                            onChange={(e) => setTaskDescription(e.target.value)}
                         />
 
                         
                         <Stack direction={'row'} spacing={2}>
                             <FormControl fullWidth size="small">
                                 <InputLabel variant="standard">Priority</InputLabel>
-                                    <NativeSelect>
+                                    <NativeSelect
+                                        value={taskPriority}
+                                        onChange={(e) => setTaskPriority(e.target.value)}
+                                    >
+                                        <option value="" disabled></option>
                                         <option value="LOW">LOW</option>
                                         <option value="MEDIUM">MEDIUM</option>
                                         <option value="HIGH">HIGH</option>
                                     </NativeSelect>
+                                
                             </FormControl>
 
-                            <FormControl fullWidth variant="outlined" size="small">
+                            <FormControl fullWidth size="small">
                                 <InputLabel variant="standard">Assignee</InputLabel>
-                                    <NativeSelect>
-                                        <option value={1}>Beni Pintea</option>
-                                        <option value={2}>Truta Andrei</option>
-                                        <option value={3}>Marc Pop</option>                                
+                                    <NativeSelect
+                                        value={assigneeId ?? ""}
+                                        onChange={(e) => setAssigneeId(Number(e.target.value))}
+                                    >   
+                                        <option value="" disabled></option>
+                                        {project?.contributors.map(contributor => (
+                                            <option key={contributor.id} value={contributor.id}>
+                                                {contributor.firstName + ' ' + contributor.lastName}
+                                            </option>
+                                        ))}                               
                                     </NativeSelect>
                             </FormControl>
 
                         </Stack>
 
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker label="Choose task deadline"/>
+                            <DatePicker
+                                label="Choose task deadline"
+                                value={taskDeadline}
+                                onChange={(newValue) => setTaskDeadline(newValue)}
+                            />
                         </LocalizationProvider>
 
                     </Stack>
@@ -135,6 +230,7 @@ export default function ProjectSettingsPage() {
                             variant='contained'
                             color="warning"
                             sx={{margin: 1, height: 30}}
+                            onClick={onEditProjectButtonClick}
                         >
                             Submit changes
                         </GradientButton>
@@ -146,13 +242,19 @@ export default function ProjectSettingsPage() {
                         margin={2}
                         spacing={2}
                     >
-                        <RoundedTextField 
+                        <TextField
+                            size="small" 
                             label='Project name'
                             placeholder="edit the project's name..."
+                            value={newProjectName}
+                            onChange={(e) => setNewProjectName(e.target.value)}
                         />
-                        <RoundedTextField 
+                        <TextField
+                            size="small" 
                             label='Project description'
                             placeholder="edit the proejct's description..."
+                            value={newProjectDescription}
+                            onChange={(e) => setNewProjectDescription(e.target.value)}
                         />
                     </Stack>
 
@@ -190,6 +292,7 @@ export default function ProjectSettingsPage() {
                                 height: 30,
                                 margin: 1
                             }}
+                            onClick={onDeleteProjectButtonClick}
                         >
                             Delete this project
                         </GradientButton>

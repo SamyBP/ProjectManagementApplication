@@ -32,32 +32,25 @@ const SignUpPge: React.FC = () => {
         }
     }
 
-    const onSingUp = (event: React.FormEvent) => {
+    const onSingUp = async (event: React.FormEvent) => {
         event.preventDefault();
         
         try {
             validatePassword(password, confirmPassword);
             validateEmail(email);
+            const dto: RegisterDto = {firstName, lastName, email, username, password}
+            const authenticationService = new AuthenticationService();
+            const response = await authenticationService.register(dto);
+            
+            if (!response.ok) {
+                console.log(response);
+                throw new Error(`${response.statusText}`)
+            }
+            navigate('/sign-in');
         } catch (error: any) {
             setErrorMessage(error.message);
             return;
         }
-
-        const dto: RegisterDto = {firstName, lastName, email, username, password}
-        const authenticationService = new AuthenticationService();
-        authenticationService.register(dto)
-                .then(response => {
-                    if (!response.ok) {
-                        console.log(response);
-                        throw new Error(`${response.statusText}`)
-                    }
-                    navigate('/sign-in');
-                })
-                .catch(error => {
-                    console.log(error);
-                    setErrorMessage(error.message);
-                })
-
     }
 
     return (

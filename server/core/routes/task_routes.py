@@ -18,7 +18,7 @@ class BaseTaskController(BaseController):
     @response(serializer_class=TaskDetailSerializer, status_code=201)
     def post(self, request: Request, project_id: int):
         serializer = TaskCreationSerializer(data=request.data, context={'request': request})
-        return self.save(serializer)
+        return self.save(serializer, project_id=project_id)
 
 
 class DetailedTaskController(BaseController):

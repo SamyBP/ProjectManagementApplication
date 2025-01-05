@@ -24,6 +24,41 @@ export class ProjectService {
         return await response.json();
     }
 
+    async updateProject(accessToken: string, projectId: Number, dto: CreateProjectDto): Promise<any> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${projectId}/`);
+
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(dto)
+        })
+
+        if (!response.ok)
+            throw new Error(`Error: ${response.statusText}`);
+
+        return await response.json();
+    }
+
+    async deleteProject(accessToken: string, projectId: Number): Promise<boolean> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${projectId}/`);
+
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+        })
+
+        if (!response.ok)
+            throw new Error(`Error: ${response.statusText}`);
+
+        return response.status === 204;
+    }
+
     async getProjectsForLoggedUser(accessToken: string): Promise<ProjectModel[]> {
         const url: string = Endpoints.PROJECTS_API;
 
