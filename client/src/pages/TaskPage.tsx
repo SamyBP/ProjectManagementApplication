@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthenticationService } from "../services/authentication.service";
 import { ProjectService } from "../services/project.service";
@@ -10,10 +10,18 @@ import theme from "../utils/theme";
 import { Card, Divider, FormControl, InputLabel, NativeSelect, Stack, TextField, Typography } from "@mui/material";
 import GradientButton from "../components/GradientButton";
 import { ProjectModel } from "../models/project.model";
+import { LoggedHoursDto } from "../models/logged.hours.dto";
+import { TaskService } from "../services/task.service";
+import { UpdateTaskDto } from "../models/update.task.dto";
 
 
 
 export default function TaskPage() {
+    const [hoursWorked, setHoursWorked] = useState('');
+    const [updatedAssigneeId, setUpdatedAssigneeId] = useState<any>(null);
+    const [updatedStatus, setUpdatedStatus] = useState('');
+
+
     const [user, setUser] = useState<UserModel | null>(null);
     const [project, setProject] = useState<ProjectModel>();
     const [hasPermission, setHasPermission] = useState<number>(0);
@@ -21,16 +29,63 @@ export default function TaskPage() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const onSubmitWorkedHoursButtonClick = async () => {
+    const onSubmitWorkedHoursButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const dto: LoggedHoursDto = {
+            projectId: project?.id,
+            taskId: location.state.task.id,
+            count: Number(hoursWorked)
+        }
+
+        const authService = new AuthenticationService();
+        const taskService = new TaskService();
+
+        try {
+            const token = await authService.getAccessTokenOrSignOut();
+            const isSuccesfullyLogged = await taskService.loggWorkedHours(token, dto);
+            console.log(`Log is success: ${isSuccesfullyLogged}`);
+        } catch (error: any) {
+            console.log(error.message);
+        }
+    }
+
+    const onUpdateTaskButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const dto: UpdateTaskDto = {
+            projectId: project?.id,
+            taskId: location.state.task.id,
+            assignee: updatedAssigneeId,
+            status: updatedStatus
+        }
+
+        const authService = new AuthenticationService();
+        const taskService = new TaskService();
+
+        try {
+            const token = await authService.getAccessTokenOrSignOut();
+            const isUpdateSuccesfull = await taskService.updateTask(token, dto);
+            console.log(`Update is success: ${isUpdateSuccesfull}`);
+        } catch (error: any) {
+            console.log(error.message);
+        }
 
     }
 
-    const onUpdateTaskButtonClick = async () => {
+    const onDeleteTaskButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
 
-    }
+        const authService = new AuthenticationService();
+        const taskService = new TaskService();
 
-    const onDeleteTaskButtonClick = async () => {
-        
+        try {
+            const token = await authService.getAccessTokenOrSignOut();
+            const isDeleteSuccesfull = await taskService.deleteTask(token, project?.id, location.state.task.id);
+            console.log(`Delete is success: ${isDeleteSuccesfull}`);
+        } catch (error: any) {
+            console.log(error.message);
+        }
     }
 
     useEffect(() => {
@@ -125,7 +180,7 @@ export default function TaskPage() {
                     </div>
 
                 </Card>
-                {(user !== null && user.id == location.state.task.assignee.id) && (
+                {(user !== null && user.id === location.state.task.assignee.id) && (
                     <Card variant="outlined" sx={{ width: 1/2, marginTop: 5 }}>
                         <div style={{
                             display: 'flex',
@@ -152,14 +207,21 @@ export default function TaskPage() {
                                 variant='contained'
                                 color="info"
                                 sx={{margin: 1, height: 30}}
-                                // onClick={onCreateTaskButtonClick}
+                                onClick={onSubmitWorkedHoursButtonClick}
                             >
                                 Submit
                             </GradientButton>
                         </div>
                         
                         <Stack spacing={2} padding={2}>
-                            <TextField size="small" label="Hours" placeholder="type in your worked hours..." fullWidth/>
+                            <TextField 
+                                size="small"
+                                label="Hours"
+                                placeholder="type in your worked hours..."
+                                value={hoursWorked}
+                                onChange={(e) => setHoursWorked(e.target.value)}
+                                fullWidth
+                            />
                         </Stack>
 
                     </Card>
@@ -193,7 +255,7 @@ export default function TaskPage() {
                                 variant='contained'
                                 color="success"
                                 sx={{margin: 1, height: 30}}
-                                // onClick={onCreateTaskButtonClick}
+                                onClick={onUpdateTaskButtonClick}
                             >
                                 Update task
                             </GradientButton>
@@ -201,7 +263,11 @@ export default function TaskPage() {
                             <Stack spacing={2} padding={2}>
                                 <FormControl fullWidth size="small">
                                     <InputLabel variant="standard">Assignee</InputLabel>
-                                        <NativeSelect>
+                                        <NativeSelect
+                                            value={updatedAssigneeId ?? ""}
+                                            onChange={(e) => setUpdatedAssigneeId(Number(e.target.value))}
+                                        >
+                                            <option value="" disabled></option>
                                             {project?.contributors.map(contributor => (
                                                 <option key={contributor.id} value={contributor.id}>
                                                     {contributor.firstName + ' ' + contributor.lastName}
@@ -212,7 +278,11 @@ export default function TaskPage() {
 
                                 <FormControl fullWidth size="small">
                                     <InputLabel variant="standard">Update the task status</InputLabel>
-                                        <NativeSelect>
+                                        <NativeSelect
+                                            value={updatedStatus}
+                                            onChange={(e) => setUpdatedStatus(e.target.value)}
+                                        >
+                                            <option value="" disabled></option>
                                             <option value="IN_PROGRESS">IN_PROGRESS</option>
                                             <option value="COMPLETED">COMPLETED</option>
                                             <option value="CLOSED">CLOSED</option>
@@ -255,7 +325,7 @@ export default function TaskPage() {
                                     height: 30,
                                     margin: 1
                                 }}
-                                // onClick={onDeleteProjectButtonClick}
+                                onClick={onDeleteTaskButtonClick}
                             >
                                 Delete this task
                             </GradientButton>

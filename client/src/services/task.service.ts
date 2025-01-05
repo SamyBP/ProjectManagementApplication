@@ -1,6 +1,8 @@
 import { CreateTaskDto } from "../models/create.task.dto";
+import { LoggedHoursDto } from "../models/logged.hours.dto";
 import { TaskStatsDto } from "../models/task-stats.dto";
 import { TaskModel } from "../models/task.model";
+import { UpdateTaskDto } from "../models/update.task.dto";
 import { Endpoints } from "../utils/endpoints";
 
 export class TaskService {
@@ -92,8 +94,8 @@ export class TaskService {
         }
     }
 
-    async deleteTask(accessToken: string, projectId: number, taskId: number): Promise<boolean> {
-        const url: string = Endpoints.PROJECTS_API.concat(`${projectId}/tasks/${taskId}/`);
+    async deleteTask(accessToken: string, projectId: number | undefined, taskId: number): Promise<boolean> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${projectId}/tasks/${taskId}/`);
 
         const response = await fetch(url, {
             method: 'DELETE',
@@ -103,8 +105,40 @@ export class TaskService {
             }
         });
 
-        return response.status == 204;
+        return response.status === 204;
     }
 
-    
+    async updateTask(accessToken: string, dto: UpdateTaskDto): Promise<boolean> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${dto.projectId}/tasks/${dto.taskId}/`);
+
+        const payload = {
+            assignee: dto.assignee,
+            status: dto.status
+        }
+
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(payload)
+        })
+
+        return response.status === 200;
+    }
+
+    async loggWorkedHours(accessToken: string, dto: LoggedHoursDto): Promise<boolean> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${dto.projectId}/tasks/${dto.taskId}/logs`);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({hoursWorked: dto.count})
+        })
+
+        return response.status === 201;
+    }
 }
