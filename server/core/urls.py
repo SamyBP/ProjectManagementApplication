@@ -2,8 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from constants import Endpoints
-from core.routes.task_routes import BaseTaskController, DetailedTaskController
-from core.routes.project_routes import BaseProjectController, DetailedProjectController
+from core.routes.task_routes import BaseTaskController, DetailedTaskController, TaskWorkLogController
+from core.routes.project_routes import BaseProjectController, DetailedProjectController, ProjectContributorController
 from core.routes.user_routes import UserController
 
 user_router = DefaultRouter()
@@ -20,10 +20,16 @@ urlpatterns = [
         path('<int:project_id>/', include([
             path('', DetailedProjectController.as_view(), name=Endpoints.PROJECT_ID.value),
 
+            path('contributors', ProjectContributorController.as_view(), name='Add contributors'),
+            
             path('tasks/', include([
                 path('', BaseTaskController.as_view(), name=Endpoints.TASK_BASE.value),
 
-                path('<int:task_id>/', DetailedTaskController.as_view(), name=Endpoints.TASK_ID.value)
+                path('<int:task_id>/', include([
+                    path('', DetailedTaskController.as_view(), name=Endpoints.TASK_ID.value),
+                    
+                    path('logs', TaskWorkLogController.as_view(), name='Log work hours on a specific task')
+                ]))
             ]))
         ]))
     ]))

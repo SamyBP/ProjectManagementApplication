@@ -26,49 +26,7 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [upcomingTasks, setUpcomingTasks] = useState<TaskModel[]>([]);
 
-    const loadUserProjects = (accessToken: string, service: ProjectService) => {
-        service.getProjectsForLoggedUser(accessToken)
-            .then(response => {
-                setProjects(response);
-            })
-            .catch(error => {
-                console.log(error.message);
-            })
-    }
-
-    const loadLoggedUser = (accessToken: string, service: UserService) => {
-        service.getLoggedUserDetails(accessToken)
-            .then(response => {
-                console.log(response);
-                setUser(response);
-            })
-            .catch(error => {
-                console.log(error.message);
-            })
-    }
-
-    const loadTaskStatistics = (accessToken: string, service: TaskService) => {
-        service.getTaskStatisticsForLoggedUser(accessToken)
-            .then(response => {
-                console.log(response);
-                setTaskStats(response);
-            })
-            .catch(error => {
-                console.log(error.message);
-            })
-    }
-
-    const loadUpcomingTasks = (accessToken: string, service: TaskService) => {
-        service.getUpcomingDueTasks(accessToken)
-            .then(response => {
-                console.log(response);
-                setUpcomingTasks(response);
-            })
-            .catch(error => {
-                console.log(error.message);
-            })
-    }
-
+    
     const onCreateProjectButtonClick = async (event: React.FormEvent) => {
         event.preventDefault();
         const projectService = new ProjectService();
@@ -93,10 +51,15 @@ export default function Dashboard() {
         const loadData = async () => {
             try {
                 const accessToken =  await authService.getAccessTokenOrSignOut();
-                loadUserProjects(accessToken, projectService);
-                loadLoggedUser(accessToken, userService);
-                loadTaskStatistics(accessToken, taskService);
-                loadUpcomingTasks(accessToken, taskService);
+                const userProjects = await projectService.getProjectsForLoggedUser(accessToken);
+                const statistics = await taskService.getTaskStatisticsForLoggedUser(accessToken);
+                const loggedUser = await userService.getLoggedUserDetails(accessToken);
+                const usersUpcomingTasks = await taskService.getUpcomingDueTasks(accessToken);
+
+                setProjects(userProjects);
+                setUser(loggedUser);
+                setTaskStats(statistics);
+                setUpcomingTasks(usersUpcomingTasks);
                 setIsLoading(false);
             } catch (error) {
                 console.log(error);

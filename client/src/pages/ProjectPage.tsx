@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useParams } from "react-router";
 import { ProjectModel } from "../models/project.model";
 import { ProjectService } from "../services/project.service";
@@ -11,7 +11,7 @@ import { TaskModel } from "../models/task.model";
 import PaginatedTaskCard from "../components/PaginatedTaskCard";
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { AuthenticationService } from "../services/authentication.service";
-import { error } from "console";
+import AddIcon from '@mui/icons-material/Add';
 
 const archives = [
     { id: 1,  name: 'Project_SNAPSHOT_01' },
@@ -26,7 +26,13 @@ export default function ProjectPage() {
     const [tasksUnderProject, setTasksUnderProejct] = useState<TaskModel[]>([]);
     const {projectId} = useParams();
     const location = useLocation();
+    const navigate = useNavigate()
     
+    const onProjectSettingsButtonClick = async (event: React.FormEvent) => {
+        event.preventDefault();
+        navigate(`/projects/${project?.id}/settings`, {state: {project: project, user: location.state.user}});
+    }
+
     useEffect(() => {
         const authService = new AuthenticationService();
         const projectService = new ProjectService();
@@ -47,7 +53,7 @@ export default function ProjectPage() {
             } catch(error) {
                 console.log(error);
                 authService.logout();
-                window.location.href = '/sign-in';
+                navigate('/sign-in');
             }
         }
 
@@ -74,7 +80,7 @@ export default function ProjectPage() {
                             <Stack direction={"row"} justifyContent="space-between" alignItems="center" sx={{ flexGrow: 1 }}>
                                 <h3>{project.name}</h3>
                                 {location.state.user.id == project.owner && (
-                                    <IconButton aria-label="settings">
+                                    <IconButton aria-label="settings" onClick={onProjectSettingsButtonClick}>
                                         <SettingsIcon sx={{ color: theme.palette.primary.main }} />
                                     </IconButton> 
                                 )}
@@ -84,7 +90,7 @@ export default function ProjectPage() {
                         <Divider />
                         <Stack direction={"row"} spacing={2} alignItems={"stretch"} alignContent={"center"}>
                             {tasksUnderProject.length !== 0 && (
-                                <PaginatedTaskCard tasks={tasksUnderProject} tasksPerPage={5} padding={0} />
+                                <PaginatedTaskCard tasks={tasksUnderProject} tasksPerPage={5} padding={0} detailed={true}/>
                             )}
                         </Stack>
                     </Card>
@@ -92,7 +98,7 @@ export default function ProjectPage() {
                 <Divider orientation="vertical" flexItem sx={{ marginLeft: "8px", marginRight: "8px" }} />
                 
                 {project && (
-                    <Stack sx={{ margin: 2, width: '300px'}} spacing={5}>
+                    <Stack sx={{ margin: 2, width: '300px'}} spacing={2}>
                         <div>
                             <Typography variant="body2" sx={{ fontWeight: 550, lineHeight: '24px', marginBottom: 2 }}>
                                 Description
@@ -105,9 +111,14 @@ export default function ProjectPage() {
                         <Divider />
 
                         <div>
-                            <Typography variant="body2" sx={{ fontWeight: 550, lineHeight: '24px', marginBottom: 2 }}>
-                                Contributors
-                            </Typography>
+                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 2 , gap: 5}}>
+                                <Typography variant="body2" sx={{ fontWeight: 550, lineHeight: '1.5em' }}>
+                                    Contributors
+                                </Typography>
+                                <IconButton>
+                                    <AddIcon />
+                                </IconButton>
+                            </div>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {project.contributors.map((contributor) => (

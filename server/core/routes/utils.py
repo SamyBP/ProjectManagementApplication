@@ -9,7 +9,7 @@ class BaseController(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def save(self, serializer):
+    def save(self, serializer, *args, **kwargs):
         if not serializer.is_valid():
             raise BaseHttpException(details=serializer.errors, status_code=400)
-        return serializer.save()
+        return serializer.save(*args, **kwargs)

@@ -24,6 +24,41 @@ export class ProjectService {
         return await response.json();
     }
 
+    async updateProject(accessToken: string, projectId: Number, dto: CreateProjectDto): Promise<any> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${projectId}/`);
+
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(dto)
+        })
+
+        if (!response.ok)
+            throw new Error(`Error: ${response.statusText}`);
+
+        return await response.json();
+    }
+
+    async deleteProject(accessToken: string, projectId: Number): Promise<boolean> {
+        const url: string = Endpoints.PROJECTS_API.concat(`/${projectId}/`);
+
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+        })
+
+        if (!response.ok)
+            throw new Error(`Error: ${response.statusText}`);
+
+        return response.status === 204;
+    }
+
     async getProjectsForLoggedUser(accessToken: string): Promise<ProjectModel[]> {
         const url: string = Endpoints.PROJECTS_API;
 
@@ -76,7 +111,21 @@ export class ProjectService {
         }
 
         const data = await response.json();
+        const now = new Date(); 
 
-        return data.results;
+        return data.results.map((task: any) => {
+            const deadline = new Date(task.deadline)
+            const dueIn = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return {
+                id: task.id,
+                assignee: task.assignee,
+                title: task.title,
+                description: task.description,
+                status: task.status,
+                priority: task.priority,
+                dueIn: dueIn,
+                projectId: task.project
+            }
+        })
     }
 }

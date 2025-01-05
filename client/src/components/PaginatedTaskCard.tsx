@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, Stack, Typography, Pagination } from "@mui/material";
 import { TaskModel } from "../models/task.model";
+import { Link } from "react-router-dom";
 
 
 interface PaginatedTaskCardProps {
@@ -8,9 +9,10 @@ interface PaginatedTaskCardProps {
   tasks: TaskModel[];
   tasksPerPage?: number;
   padding?: number | string;
+  detailed?: boolean
 }
 
-const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title = '', tasks, tasksPerPage = 5, padding = 4 }) => {
+const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title = '', tasks, tasksPerPage = 5, padding = 4, detailed = false }) => {
   const [page, setPage] = useState<number>(1);
 
   const indexOfLastTask = page * tasksPerPage;
@@ -28,12 +30,50 @@ const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title = '', tasks
       </Typography>
       <Stack spacing={2}>
         {currentTasks.map((task) => (
-          <Card key={task.id} sx={{ padding: 2, boxShadow: 1 }}>
-            <Typography variant="body1">{task.title}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Due in {task.dueIn} days
-            </Typography>
-          </Card>
+          <Link
+            key={task.id}
+            to={`/tasks/${task.id}`}
+            state={{ task }}
+            style={{ textDecoration: 'none' }}
+          >
+            <Card 
+              key={task.id}
+              sx={{ 
+                padding: 2,
+                boxShadow: 1,
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: 4
+                }
+              }}
+            >
+              <Stack>
+              <Typography variant="body1">{task.title}</Typography>
+
+              {detailed && (
+                <>
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    <b>Assignee:</b> {task.assignee.username}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    <b>Description:</b> {task.description}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    <b>Status:</b> {task.status}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                  <b> Priority:</b> {task.priority}
+                  </Typography> 
+                </>
+              )}
+
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <b>Due in:</b> {task.dueIn} days
+              </Typography>
+              </Stack>
+            </Card>
+          </Link>
         ))}
       </Stack>
       <Pagination
