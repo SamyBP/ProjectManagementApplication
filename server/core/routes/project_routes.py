@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
+from django.contrib.auth.models import User
 
 from core.models import Project
 from core.routes.utils import BaseController
@@ -37,3 +38,12 @@ class DetailedProjectController(BaseController):
         project_to_delete = get_object_or_404(Project, id=project_id)
         project_to_delete.delete()
         return Response(status=204)
+    
+class ProjectContributorController(BaseController):
+    
+    def post(self, request: Request, project_id: int):
+        project = get_object_or_404(Project, id=project_id)
+        contributors_ids = request.data.get('contributors')
+        contributors = User.objects.filter(id__in=contributors_ids)
+        project.contributors.add(*contributors)
+        return Response(data={'message': f"added contributors to project: {project.name}"}, status=200)

@@ -18,6 +18,12 @@ class TaskCreationSerializer(BaseModelSerializer):
         fields = [field.name for field in Task._meta.get_fields() if field.name not in ('project', 'id')]
 
 
+class TaskUpdateSerializer(BaseModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['assignee', 'status']
+
+
 class TaskStatisticsSerializer(serializers.Serializer):
     low = serializers.IntegerField()
     medium = serializers.IntegerField()

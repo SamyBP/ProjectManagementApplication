@@ -91,4 +91,20 @@ export class TaskService {
             projectId: data.project
         }
     }
+
+    async deleteTask(accessToken: string, projectId: number, taskId: number): Promise<boolean> {
+        const url: string = Endpoints.PROJECTS_API.concat(`${projectId}/tasks/${taskId}/`);
+
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        return response.status == 204;
+    }
+
+    
 }

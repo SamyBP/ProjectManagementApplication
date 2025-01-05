@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthenticationService } from "../services/authentication.service";
 import { ProjectService } from "../services/project.service";
-import { TaskService } from "../services/task.service";
 import { UserService } from "../services/user.service";
 import { UserModel } from "../models/user.model";
 import { TaskModel } from "../models/task.model";
@@ -21,6 +20,18 @@ export default function TaskPage() {
 
     const location = useLocation();
     const navigate = useNavigate();
+
+    const onSubmitWorkedHoursButtonClick = async () => {
+
+    }
+
+    const onUpdateTaskButtonClick = async () => {
+
+    }
+
+    const onDeleteTaskButtonClick = async () => {
+        
+    }
 
     useEffect(() => {
         const setPermissionType = async () => {

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from core.models import Task
 from core.routes.utils import BaseController
-from core.serializers import TaskDetailSerializer, TaskCreationSerializer
+from core.serializers import TaskDetailSerializer, TaskCreationSerializer, TaskUpdateSerializer
 from decorators import paginated, response
 
 
@@ -30,7 +30,7 @@ class DetailedTaskController(BaseController):
     @response(serializer_class=TaskDetailSerializer)
     def put(self, request: Request, project_id: int, task_id: int):
         task_to_update = get_object_or_404(Task, id=task_id)
-        serializer = TaskCreationSerializer(task_to_update, data=request.data)
+        serializer = TaskUpdateSerializer(task_to_update, data=request.data)
         return self.save(serializer)
 
     def delete(self, request: Request, project_id: int, task_id: int):
