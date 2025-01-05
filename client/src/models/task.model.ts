@@ -7,5 +7,6 @@ export interface TaskModel {
     description: string,
     status: string,
     priority: string,
-    dueIn: number
+    dueIn: number,
+    projectId: number;
 }

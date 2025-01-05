@@ -32,7 +32,8 @@ const PaginatedTaskCard: React.FC<PaginatedTaskCardProps> = ({ title = '', tasks
         {currentTasks.map((task) => (
           <Link
             key={task.id}
-            to={'/'}
+            to={`/tasks/${task.id}`}
+            state={{ task }}
             style={{ textDecoration: 'none' }}
           >
             <Card 

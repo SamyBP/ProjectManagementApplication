@@ -111,7 +111,21 @@ export class ProjectService {
         }
 
         const data = await response.json();
+        const now = new Date(); 
 
-        return data.results;
+        return data.results.map((task: any) => {
+            const deadline = new Date(task.deadline)
+            const dueIn = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return {
+                id: task.id,
+                assignee: task.assignee,
+                title: task.title,
+                description: task.description,
+                status: task.status,
+                priority: task.priority,
+                dueIn: dueIn,
+                projectId: task.project
+            }
+        })
     }
 }

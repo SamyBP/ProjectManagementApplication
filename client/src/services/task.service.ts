@@ -4,6 +4,7 @@ import { TaskModel } from "../models/task.model";
 import { Endpoints } from "../utils/endpoints";
 
 export class TaskService {
+
     async getTaskStatisticsForLoggedUser(accessToken: string): Promise<TaskStatsDto[]> {
         const url: string = Endpoints.USER_STATS_API
         const response = await fetch(url, {
@@ -53,7 +54,8 @@ export class TaskService {
                 description: task.description,
                 status: task.status,
                 priority: task.priority,
-                dueIn: dueIn
+                dueIn: dueIn,
+                projectId: task.project
             }
         })
     }
@@ -85,7 +87,8 @@ export class TaskService {
             description: data.description,
             status: data.status,
             priority: data.priority,
-            dueIn: dueIn
+            dueIn: dueIn,
+            projectId: data.project
         }
     }
 }
