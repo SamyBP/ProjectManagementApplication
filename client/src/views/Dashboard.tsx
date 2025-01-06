@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import SideMenu from "../components/SideMenu";
 import { ProjectModel } from "../models/project.model";
 import { UserModel } from "../models/user.model";
@@ -10,67 +10,33 @@ import { PieChart } from "@mui/x-charts/PieChart"
 import { TaskStatsDto } from "../models/task-stats.dto";
 import { TaskModel } from "../models/task.model";
 import PaginatedTaskCard from "../components/PaginatedTaskCard";
-import { ProjectService } from "../services/project.service";
-import { UserService } from "../services/user.service";
-import { TaskService } from "../services/task.service";
-import { AuthenticationService } from "../services/authentication.service";
-import { CreateProjectDto } from "../models/create.project.dto";
 
 
-export default function Dashboard() {
-    const [newProjectName, setNewProjectName] = useState<string>('');
-    const [newProjectDescription, setNewProjectDescription] = useState<string>('');
-    const [taskStats, setTaskStats] = useState<TaskStatsDto[]>([]);
-    const [projects, setProjects] = useState<ProjectModel[]>([]);
-    const [user, setUser] = useState<UserModel | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [upcomingTasks, setUpcomingTasks] = useState<TaskModel[]>([]);
+interface DashboardViewProps {
+    newProjectName: string;
+    newProjectDescription: string;
+    user: UserModel | null;
+    projects: ProjectModel[];
+    taskStats: TaskStatsDto[];
+    upcomingTasks: TaskModel[];
+    isLoading: boolean;
+    onNewProjectNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    onNewProjectDescriptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    onCreateProjectButtonClick: (e: React.FormEvent) => void
+}
 
-    
-    const onCreateProjectButtonClick = async (event: React.FormEvent) => {
-        event.preventDefault();
-        const projectService = new ProjectService();
-        const authService = new AuthenticationService();
-
-        try {
-            const accessToken = await authService.getAccessTokenOrSignOut();
-            const dto: CreateProjectDto = { name: newProjectName, description: newProjectDescription }
-            const createdProject = await projectService.createNewProject(accessToken, dto);
-            console.log(createdProject);
-        } catch(error) {
-            console.log(error);
-        }
-    }
-
-    useEffect(() => {
-        const authService: AuthenticationService = new AuthenticationService();
-        const taskService: TaskService = new TaskService();
-        const userService: UserService = new UserService();
-        const projectService: ProjectService = new ProjectService();
-
-        const loadData = async () => {
-            try {
-                const accessToken =  await authService.getAccessTokenOrSignOut();
-                const userProjects = await projectService.getProjectsForLoggedUser(accessToken);
-                const statistics = await taskService.getTaskStatisticsForLoggedUser(accessToken);
-                const loggedUser = await userService.getLoggedUserDetails(accessToken);
-                const usersUpcomingTasks = await taskService.getUpcomingDueTasks(accessToken);
-
-                setProjects(userProjects);
-                setUser(loggedUser);
-                setTaskStats(statistics);
-                setUpcomingTasks(usersUpcomingTasks);
-                setIsLoading(false);
-            } catch (error) {
-                console.log(error);
-                authService.logout();
-                window.location.href = '/sign-in';
-            }
-        }
-
-        loadData();
-    }, []);
-
+const DashboardView: React.FC<DashboardViewProps> = ({
+    newProjectName,
+    newProjectDescription,
+    user,
+    projects,
+    taskStats,
+    upcomingTasks,
+    isLoading,
+    onNewProjectNameChange,
+    onNewProjectDescriptionChange,
+    onCreateProjectButtonClick
+}) => {
     if (isLoading) {
         return (
             <div style={{display: "flex", alignContent: "center", justifyContent: "center"}}>
@@ -80,9 +46,8 @@ export default function Dashboard() {
     }
 
     return (
-
         <ThemeProvider theme={theme}>
-            <div style={{display: 'flex'}}>
+            <div style={{ display: 'flex' }}>
                 {user && 
                     (<SideMenu projects={projects} user={user} />)
                 }
@@ -100,16 +65,18 @@ export default function Dashboard() {
 
                             <Stack spacing={2} marginTop={3}>
                                 <RoundedTextField 
+                                    name="newProjectName"
                                     value={newProjectName}
-                                    onChange={(e) => setNewProjectName(e.target.value)}
+                                    onChange={onNewProjectNameChange}
                                     label="Project name" 
                                     placeholder="name your new project..." 
                                     fullWidth 
                                     required
                                 />
                                 <RoundedTextField
+                                    name="newProjectDescription"
                                     value={newProjectDescription}
-                                    onChange={(e) => setNewProjectDescription(e.target.value)} 
+                                    onChange={onNewProjectDescriptionChange}
                                     label="Project description"
                                     placeholder="add a description to your project..."
                                     fullWidth 
@@ -145,5 +112,7 @@ export default function Dashboard() {
                 </Stack>
             </div>
         </ThemeProvider>
-    );
+    )
 }
+
+export default DashboardView;

@@ -1,104 +1,55 @@
-import { useLocation, useParams } from "react-router-dom";
 import { ProjectModel } from "../models/project.model";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card, Divider, FormControl, InputLabel, NativeSelect, Stack, TextField, ThemeProvider, Typography } from "@mui/material";
 import GradientButton from "../components/GradientButton";
 import theme from "../utils/theme";
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { CreateTaskDto } from "../models/create.task.dto";
-import { CreateProjectDto } from "../models/create.project.dto";
-import { ProjectService } from "../services/project.service";
-import { AuthenticationService } from "../services/authentication.service";
-import { TaskService } from "../services/task.service";
-
-export default function ProjectSettingsPage() {
-    const location = useLocation();
-    const {projectId} = useParams();
-    const [project, setProject] = useState<ProjectModel| null>(null);
-
-    // CreateTaskForm
-    const [taskTitle, setTaskTitile] = useState('');
-    const [taskDescription, setTaskDescription] = useState('');
-    const [taskPriority, setTaskPriority] = useState('');
-    const [assigneeId, setAssigneeId] = useState<any>(null);
-    const [taskDeadline, setTaskDeadline] = useState<any>(null);
-
-    // Edit Project Form
-
-    const [newProjectName, setNewProjectName] = useState('');
-    const [newProjectDescription, setNewProjectDescription] = useState('');
 
 
-    const onCreateTaskButtonClick = async (event: React.FormEvent) => {
-        event.preventDefault();
+interface ProjectSettingsViewProps {
+    project: ProjectModel | null;
+    taskTitle: string;
+    taskDescription: string;
+    taskPriority: string;
+    assigneeId: any;
+    taskDeadline: any;
+    newProjectName: string;
+    newProjectDescription: string;
+    onTaskTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onTaskDescriptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onTaskPriorityChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onAssigneeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onTaskDeadlineChange: (date: any) => void;
+    onNewProjectNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onNewProjectDescriptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onCreateTaskButtonClick: (e: React.FormEvent) => void;
+    onEditProjectButtonClick: (e: React.FormEvent) => void;
+    onDeleteProjectButtonClick: (e: React.FormEvent) => void;
+}
 
-        if (!assigneeId) {
-            console.log("assignee is null");
-            return
-        }
-
-        const dto: CreateTaskDto = {
-            title: taskTitle,
-            description: taskDescription,
-            priority: taskPriority,
-            status: "ASSIGNED",
-            assignee: assigneeId,
-            deadline: taskDeadline ? taskDeadline.format("YYYY-MM-DD") : ""
-        }
-
-        const taskService: TaskService = new TaskService();
-        const authService: AuthenticationService = new AuthenticationService();
-        try {
-            const accessToken = await authService.getAccessTokenOrSignOut();
-            const createdTask = await taskService.createNewTask(accessToken, Number(projectId), dto);
-            console.log(`Created task: ${createdTask}`);
-        } catch (error: any)  {
-            console.log(error.message);
-        }
-
-    }
-
-    const onEditProjectButtonClick = async (event: React.FormEvent) => {
-        event.preventDefault();
-
-        const dto: CreateProjectDto =  {name: newProjectName, description: newProjectDescription}
-        const projectService: ProjectService = new ProjectService();
-        const authService: AuthenticationService = new AuthenticationService();
-        try {
-            const accessToken = await authService.getAccessTokenOrSignOut();
-            const updatedProject = await projectService.updateProject(accessToken, Number(projectId), dto);
+const ProjectSettingsView: React.FC<ProjectSettingsViewProps> = ({
+    project,
+    taskTitle,
+    taskDescription,
+    taskPriority,
+    assigneeId,
+    taskDeadline,
+    newProjectName,
+    newProjectDescription,
+    onTaskTitleChange,
+    onTaskDescriptionChange,
+    onTaskPriorityChange,
+    onAssigneeChange,
+    onTaskDeadlineChange,
     
-            console.log(`Updated project ${updatedProject}`);
-        } catch (error: any) {
-            console.log(error.message);
-        }
-
-    }
-
-    const onDeleteProjectButtonClick = async (event: React.FormEvent) => {
-        event.preventDefault();
-        const projectService: ProjectService = new ProjectService();
-        const authService: AuthenticationService = new AuthenticationService();
-        try {
-            const accessToken = await authService.getAccessTokenOrSignOut();
-            const isDeleted = await projectService.deleteProject(accessToken, Number(projectId));
+    onNewProjectNameChange,
+    onNewProjectDescriptionChange,
     
-            console.log(`Deleted project: ${isDeleted}`);
-        } catch(error: any) {
-            console.log(error.message)
-        }
-    }
-
-    useEffect(() => {
-        if (location.state.project.owner !== location.state.user.id) {
-            window.location.href = '/sign-in';
-            return;
-        }
-
-        setProject(location.state.project);
-    }, [location])
-
+    onCreateTaskButtonClick,
+    onEditProjectButtonClick,
+    onDeleteProjectButtonClick
+}) => {
     return (
         <ThemeProvider theme={theme}>    
             <div 
@@ -148,7 +99,7 @@ export default function ProjectSettingsPage() {
                             label='Task title'
                             placeholder="enter the task's title"
                             value={taskTitle}
-                            onChange={(e) => setTaskTitile(e.target.value)}
+                            onChange={onTaskTitleChange}
                         />
 
                         <TextField
@@ -156,7 +107,7 @@ export default function ProjectSettingsPage() {
                             label='Task description'
                             placeholder="enter the task's description"
                             value={taskDescription}
-                            onChange={(e) => setTaskDescription(e.target.value)}
+                            onChange={onTaskDescriptionChange}
                         />
 
                         
@@ -165,7 +116,7 @@ export default function ProjectSettingsPage() {
                                 <InputLabel variant="standard">Priority</InputLabel>
                                     <NativeSelect
                                         value={taskPriority}
-                                        onChange={(e) => setTaskPriority(e.target.value)}
+                                        onChange={onTaskPriorityChange}
                                     >
                                         <option value="" disabled></option>
                                         <option value="LOW">LOW</option>
@@ -179,7 +130,7 @@ export default function ProjectSettingsPage() {
                                 <InputLabel variant="standard">Assignee</InputLabel>
                                     <NativeSelect
                                         value={assigneeId ?? ""}
-                                        onChange={(e) => setAssigneeId(Number(e.target.value))}
+                                        onChange={onAssigneeChange} //(e) => setAssigneeId(Number(e.target.value))
                                     >   
                                         <option value="" disabled></option>
                                         {project?.contributors.map(contributor => (
@@ -196,7 +147,7 @@ export default function ProjectSettingsPage() {
                             <DatePicker
                                 label="Choose task deadline"
                                 value={taskDeadline}
-                                onChange={(newValue) => setTaskDeadline(newValue)}
+                                onChange={onTaskDeadlineChange} // (newValue) => setTaskDeadline(newValue)
                             />
                         </LocalizationProvider>
 
@@ -247,14 +198,14 @@ export default function ProjectSettingsPage() {
                             label='Project name'
                             placeholder="edit the project's name..."
                             value={newProjectName}
-                            onChange={(e) => setNewProjectName(e.target.value)}
+                            onChange={onNewProjectNameChange}
                         />
                         <TextField
                             size="small" 
                             label='Project description'
                             placeholder="edit the proejct's description..."
                             value={newProjectDescription}
-                            onChange={(e) => setNewProjectDescription(e.target.value)}
+                            onChange={onNewProjectDescriptionChange}
                         />
                     </Stack>
 
@@ -302,4 +253,6 @@ export default function ProjectSettingsPage() {
             </div>
         </ThemeProvider>
     );
-} 
+}
+
+export default ProjectSettingsView;

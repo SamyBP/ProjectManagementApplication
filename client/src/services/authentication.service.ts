@@ -6,7 +6,7 @@ import { Endpoints } from "../utils/endpoints";
 export class AuthenticationService {
 
     register(registerDto: RegisterDto) {
-        const url: string = Endpoints.REGISTER;
+        const url: string = Endpoints.REGISTER + '/';
 
         return fetch(url, {
             method: 'POST',

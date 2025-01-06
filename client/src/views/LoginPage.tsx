@@ -1,36 +1,21 @@
-import React, { useState } from "react";
-import { Card, Divider, Stack, Typography } from "@mui/material";
+import React from "react";
+import { Card, Divider, Stack, TextField, Typography } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../utils/theme";
-import RoundedTextField from "../components/RoundedTextField";
 import PageContainer from "../components/PageContainer";
-import { LoginDto } from "../models/login.dto";
-import { AuthenticationService } from "../services/authentication.service";
 import GradientButton from "../components/GradientButton";
 import { Link } from "react-router-dom";
 
-const LoginPage: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+interface LoginViewProps {
+    username: string;
+    password: string;
+    errorMessage: string;
+    onSignIn: (e: React.FormEvent) => void;
+    onUsernameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
-    const onSignIn = async (event: React.FormEvent) => {
-        event.preventDefault();
-        const dto: LoginDto = {username, password};
-        const authenticationService = new AuthenticationService();
-        try {
-            const jwt = await authenticationService.login(dto);
-            localStorage.clear();
-            localStorage.setItem('access', jwt.access);
-            localStorage.setItem('refresh', jwt.refresh);
-            window.location.href = '/dashboard'
-        } catch (error: any) {
-            setErrorMessage(error.message);
-            console.log(error);
-        }
-    }
-
-
+const LoginView: React.FC<LoginViewProps> = ({username, password, errorMessage, onSignIn, onUsernameChange, onPasswordChange}) => {
     return (
         <ThemeProvider theme={theme}>
             <PageContainer>
@@ -40,8 +25,8 @@ const LoginPage: React.FC = () => {
                             Sign in
                         </Typography>
                         
-                        <RoundedTextField value={username} onChange={(e) => setUsername(e.target.value)} label="Username" type="text" fullWidth required />
-                        <RoundedTextField  value={password} onChange={(e) => setPassword(e.target.value)} label="Password" type="password" fullWidth required />
+                        <TextField size="small" value={username} onChange={onUsernameChange} label="Username" type="text" fullWidth required />
+                        <TextField size="small" value={password} onChange={onPasswordChange} label="Password" type="password" fullWidth required />
 
                         <GradientButton onClick={onSignIn} variant="contained" fullWidth>
                             Sign in
@@ -67,7 +52,7 @@ const LoginPage: React.FC = () => {
                 </Card>
             </PageContainer>
         </ThemeProvider>
-  );
-};
+    );
+}
 
-export default LoginPage;
+export default LoginView;
