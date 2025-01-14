@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ProjectModel } from "../models/project.model";
 import ProjectSettingsView from "../views/ProjectSettingsPage";
 import { CreateTaskDto } from "../models/create.task.dto";
@@ -7,11 +7,13 @@ import { TaskService } from "../services/task.service";
 import { AuthenticationService } from "../services/authentication.service";
 import { CreateProjectDto } from "../models/create.project.dto";
 import { ProjectService } from "../services/project.service";
+import { ToastHandler } from "../utils/handler";
 
 const ProjectSettingsController : React.FC = () => {
     const location = useLocation();
     const {projectId} = useParams();
     const [project, setProject] = useState<ProjectModel| null>(null);
+    const navigate = useNavigate();
 
     // CreateTaskForm
     const [taskTitle, setTaskTitile] = useState('');
@@ -47,8 +49,11 @@ const ProjectSettingsController : React.FC = () => {
         try {
             const accessToken = await authService.getAccessTokenOrSignOut();
             const createdTask = await taskService.createNewTask(accessToken, Number(projectId), dto);
+            await ToastHandler.success("Created task");
+            navigate(`/projects/${projectId}`, {state: {project, user: location.state.user}});
             console.log(`Created task: ${createdTask}`);
         } catch (error: any)  {
+            await ToastHandler.error(error.message);
             console.log(error.message);
         }
     }
@@ -62,9 +67,11 @@ const ProjectSettingsController : React.FC = () => {
         try {
             const accessToken = await authService.getAccessTokenOrSignOut();
             const updatedProject = await projectService.updateProject(accessToken, Number(projectId), dto);
-    
+            await ToastHandler.success("Updated project");
+            navigate(`/projects/${updatedProject.id}`, {state: {project: updatedProject, user: location.state.user}});
             console.log(`Updated project ${updatedProject}`);
         } catch (error: any) {
+            await ToastHandler.error(error.message);
             console.log(error.message);
         }
     }
@@ -76,9 +83,11 @@ const ProjectSettingsController : React.FC = () => {
         try {
             const accessToken = await authService.getAccessTokenOrSignOut();
             const isDeleted = await projectService.deleteProject(accessToken, Number(projectId));
-    
+            await ToastHandler.success(`Deleted project`);
+            navigate('/dashboard', {state: {user: location.state.user}});
             console.log(`Deleted project: ${isDeleted}`);
         } catch(error: any) {
+            await ToastHandler.error(error.message);
             console.log(error.message)
         }
     }

@@ -9,6 +9,8 @@ import { AuthenticationService } from "../services/authentication.service";
 import { ProjectService } from "../services/project.service";
 import { TaskService } from "../services/task.service";
 import { UserService } from "../services/user.service";
+import { useNavigate } from "react-router-dom";
+import { ToastHandler } from "../utils/handler";
 
 const DashboardController: React.FC = () => {
     const [newProjectName, setNewProjectName] = useState<string>('');
@@ -18,6 +20,8 @@ const DashboardController: React.FC = () => {
     const [user, setUser] = useState<UserModel | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [upcomingTasks, setUpcomingTasks] = useState<TaskModel[]>([]); 
+
+    const navigate = useNavigate();
 
     const onNewProjectNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
@@ -38,8 +42,11 @@ const DashboardController: React.FC = () => {
             const accessToken = await authService.getAccessTokenOrSignOut();
             const dto: CreateProjectDto = { name: newProjectName, description: newProjectDescription }
             const createdProject = await projectService.createNewProject(accessToken, dto);
+            await ToastHandler.success("Created project");
+            navigate(`/projects/${createdProject.id}`, {state: { project: createdProject, user }});
             console.log(createdProject);
         } catch(error) {
+            await ToastHandler.error("Could not create the project");
             console.log(error); 
         }
     }

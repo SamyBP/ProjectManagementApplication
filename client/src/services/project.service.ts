@@ -96,6 +96,25 @@ export class ProjectService {
         return response.json();
     }
 
+    async addContributor(accessToken: string, projectId: number | undefined, username: string): Promise<any> {
+        const url: string = `${Endpoints.PROJECTS_API}/${projectId}/contributors`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({contributor: username})
+        })
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        return await response.json();
+    }
+
     async getAllTasksUnderProject(accessToken: string, projectId: number): Promise<TaskModel[]> {
         const url: string = `${Endpoints.PROJECTS_API}/${projectId}/tasks`
 

@@ -1,5 +1,5 @@
 import { ProjectModel } from "../models/project.model";
-import { Avatar, Card, Divider, IconButton, ThemeProvider, Typography } from "@mui/material";
+import { Avatar, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
 import { Stack } from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import theme from "../utils/theme";
@@ -7,15 +7,37 @@ import { TaskModel } from "../models/task.model";
 import PaginatedTaskCard from "../components/PaginatedTaskCard";
 import AddIcon from '@mui/icons-material/Add';
 import { UserModel } from "../models/user.model";
+import React from "react";
 
 interface ProjectViewProps {
     user: UserModel;
     project: ProjectModel | null;
     tasksUnderProject: TaskModel[];
+    isDialogOpen: boolean;
+    setIsDialogOpen: (isOpen: boolean) => void;
+    newContributorUsername: string;
+    setNewContributorUsername: (username: string) => void;
     onProjectSettingsButtonClick: (e: React.FormEvent) => void;
+    handleAddContributorClick: () => void;
+    handleDialogClose: () => void;
+    handleAddContributorSubmit: (e: React.FormEvent) => void;
 }
 
-const ProjectView: React.FC<ProjectViewProps> = ({ project, tasksUnderProject, user, onProjectSettingsButtonClick }) => {
+const ProjectView: React.FC<ProjectViewProps> = ({ 
+    project, 
+    tasksUnderProject, 
+    user, 
+    onProjectSettingsButtonClick, 
+    handleAddContributorClick, 
+    handleDialogClose, 
+    handleAddContributorSubmit,
+    newContributorUsername,
+    setNewContributorUsername,
+    isDialogOpen,
+    setIsDialogOpen
+
+}) => {
+
     return (
         <ThemeProvider theme={theme}>
             <div 
@@ -69,7 +91,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, tasksUnderProject, u
                                 <Typography variant="body2" sx={{ fontWeight: 550, lineHeight: '1.5em' }}>
                                     Contributors
                                 </Typography>
-                                <IconButton>
+                                <IconButton onClick={handleAddContributorClick}>
                                     <AddIcon />
                                 </IconButton>
                             </div>
@@ -101,6 +123,25 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, tasksUnderProject, u
                 
 
             </div>
+            <Dialog open={isDialogOpen} onClose={handleDialogClose} fullWidth maxWidth="md">
+                <DialogTitle>Add Contributor</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Contributor username"
+                        type="email"
+                        fullWidth
+                        variant="outlined"
+                        value={newContributorUsername}
+                        onChange={(e) => setNewContributorUsername(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="secondary">Cancel</Button>
+                    <Button onClick={handleAddContributorSubmit} color="primary">Add</Button>
+                </DialogActions>
+            </Dialog>
         </ThemeProvider>
     );
 }

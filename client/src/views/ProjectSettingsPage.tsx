@@ -5,6 +5,7 @@ import GradientButton from "../components/GradientButton";
 import theme from "../utils/theme";
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { ToastContainer } from "react-toastify";
 
 
 interface ProjectSettingsViewProps {
@@ -251,6 +252,7 @@ const ProjectSettingsView: React.FC<ProjectSettingsViewProps> = ({
 
             </Card>
             </div>
+            <ToastContainer aria-label={""}/>
         </ThemeProvider>
     );
 }

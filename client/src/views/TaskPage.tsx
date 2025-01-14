@@ -6,6 +6,7 @@ import theme from "../utils/theme";
 import { Card, Divider, FormControl, InputLabel, NativeSelect, Stack, TextField, Typography } from "@mui/material";
 import GradientButton from "../components/GradientButton";
 import { ProjectModel } from "../models/project.model";
+import { ToastContainer } from "react-toastify";
 
 
 interface TaskViewProps {
@@ -199,7 +200,7 @@ const TaskView: React.FC<TaskViewProps> = ({
                                             >
                                                 <option value="" disabled></option>
                                                 <option value="IN_PROGRESS">IN_PROGRESS</option>
-                                                <option value="COMPLETED">COMPLETED</option>
+                                                <option value="FINISHED">FINISHED</option>
                                                 <option value="CLOSED">CLOSED</option>
                                             </NativeSelect>
                                     </FormControl>
@@ -248,6 +249,7 @@ const TaskView: React.FC<TaskViewProps> = ({
                         </Card>
                     )}
                 </div>
+                <ToastContainer aria-label={""} />
             </ThemeProvider>
     );
 }

@@ -10,6 +10,8 @@ import { PieChart } from "@mui/x-charts/PieChart"
 import { TaskStatsDto } from "../models/task-stats.dto";
 import { TaskModel } from "../models/task.model";
 import PaginatedTaskCard from "../components/PaginatedTaskCard";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 
 interface DashboardViewProps {
@@ -111,6 +113,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                     </Stack>
                 </Stack>
             </div>
+            <ToastContainer aria-label={""}/>
         </ThemeProvider>
     )
 }

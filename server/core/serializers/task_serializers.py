@@ -15,7 +15,7 @@ class TaskDetailSerializer(BaseModelSerializer):
 class TaskCreationSerializer(BaseModelSerializer):
     class Meta:
         model = Task
-        fields = [field.name for field in Task._meta.get_fields() if field.name not in ('project', 'id')]
+        fields = [field.name for field in Task._meta.get_fields() if field.name not in ('project', 'id', 'worklog')]
 
 
 class TaskUpdateSerializer(BaseModelSerializer):

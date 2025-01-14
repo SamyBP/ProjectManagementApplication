@@ -10,6 +10,7 @@ import { LoggedHoursDto } from "../models/logged.hours.dto";
 import { UserService } from "../services/user.service";
 import { ProjectService } from "../services/project.service";
 import { TaskModel } from "../models/task.model";
+import { ToastHandler } from "../utils/handler";
 
 const TaskController: React.FC = () => {
     const [hoursWorked, setHoursWorked] = useState('');
@@ -39,8 +40,11 @@ const TaskController: React.FC = () => {
         try {
             const token = await authService.getAccessTokenOrSignOut();
             const isSuccesfullyLogged = await taskService.loggWorkedHours(token, dto);
+            await ToastHandler.success("Logged hours");
+            navigate(`/dashboard`);
             console.log(`Log is success: ${isSuccesfullyLogged}`);
         } catch (error: any) {
+            await ToastHandler.error(error.message);
             console.log(error.message);
         }
     }
@@ -54,8 +58,11 @@ const TaskController: React.FC = () => {
         try {
             const token = await authService.getAccessTokenOrSignOut();
             const isDeleteSuccesfull = await taskService.deleteTask(token, project?.id, location.state.task.id);
+            await ToastHandler.success("Deleted task");
+            navigate(`/dashboard`);
             console.log(`Delete is success: ${isDeleteSuccesfull}`);
         } catch (error: any) {
+            await ToastHandler.error(error.message);
             console.log(error.message);
         }
     }
@@ -76,8 +83,11 @@ const TaskController: React.FC = () => {
         try {
             const token = await authService.getAccessTokenOrSignOut();
             const isUpdateSuccesfull = await taskService.updateTask(token, dto);
+            await ToastHandler.success("Updated task");
+            navigate(`/dashboard`);
             console.log(`Update is success: ${isUpdateSuccesfull}`);
         } catch (error: any) {
+            await ToastHandler.error(error.message);
             console.log(error.message);
         }
     }

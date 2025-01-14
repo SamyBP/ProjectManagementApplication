@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ProjectView from "../views/ProjectPage";
 import { AuthenticationService } from "../services/authentication.service";
 import { ProjectService } from "../services/project.service";
+import { ToastHandler } from "../utils/handler";
 
 const ProjectController: React.FC = () => {
     const [project, setProject] = useState<ProjectModel | null>(null);
@@ -12,6 +13,31 @@ const ProjectController: React.FC = () => {
     const {projectId} = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+
+    const [isDialogOpen, setDialogOpen] = useState(false);
+    const [newContributorUsername, setNewContributorUsername] = useState('');
+
+    const handleAddContributorClick = () => {
+        setDialogOpen(true);
+    }
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+        setNewContributorUsername('');
+    }
+
+    const handleAddContributorSubmit = async (e: React.FormEvent) => {
+        console.log(newContributorUsername);
+        try {
+            const authService = new AuthenticationService();
+            const projectService = new ProjectService();
+            await projectService.addContributor(await authService.getAccessTokenOrSignOut(), project?.id, newContributorUsername);
+            await ToastHandler.success(`Added ${newContributorUsername} as a contributor`);
+        } catch(error: any) {
+            await ToastHandler.error(error.message);
+        }
+        handleDialogClose();
+    }
 
     const onProjectSettingsButtonClick = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,6 +78,13 @@ const ProjectController: React.FC = () => {
             project={project}
             tasksUnderProject={tasksUnderProject}
             onProjectSettingsButtonClick={onProjectSettingsButtonClick}
+            handleAddContributorClick={handleAddContributorClick}
+            handleDialogClose={handleDialogClose}
+            handleAddContributorSubmit={handleAddContributorSubmit}
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setDialogOpen}
+            newContributorUsername={newContributorUsername}
+            setNewContributorUsername={setNewContributorUsername}
         />
     );
 }

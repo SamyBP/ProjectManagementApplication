@@ -7,13 +7,14 @@ from core.models import Project
 from core.routes.utils import BaseController
 from core.serializers import ProjectDetailsSerializer, CreateProjectSerializer
 from decorators import paginated, response
+from django.db.models import Q
 
 
 class BaseProjectController(BaseController):
 
     @paginated(serializer_class=ProjectDetailsSerializer)
     def get(self, request: Request):
-        projects = Project.objects.filter(owner=request.user)
+        projects = Project.objects.filter(Q(owner=request.user) | Q(contributors=request.user)).distinct()
         return projects
 
     @response(serializer_class=ProjectDetailsSerializer, status_code=201)
@@ -43,7 +44,7 @@ class ProjectContributorController(BaseController):
     
     def post(self, request: Request, project_id: int):
         project = get_object_or_404(Project, id=project_id)
-        contributors_ids = request.data.get('contributors')
-        contributors = User.objects.filter(id__in=contributors_ids)
-        project.contributors.add(*contributors)
+        contributor_username = request.data.get('contributor')
+        contributor = get_object_or_404(User, username=contributor_username)
+        project.contributors.add(contributor)
         return Response(data={'message': f"added contributors to project: {project.name}"}, status=200)
